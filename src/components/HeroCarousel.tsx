@@ -6,21 +6,9 @@ import heroImage2 from "@/assets/hero-jewelry-2.jpg";
 import heroImage3 from "@/assets/hero-jewelry-3.jpg";
 
 const slides = [
-  {
-    image: heroImage1,
-    title: "Timeless Elegance",
-    subtitle: "Discover our new collection",
-  },
-  {
-    image: heroImage2,
-    title: "Luxury Redefined",
-    subtitle: "Crafted with precision",
-  },
-  {
-    image: heroImage3,
-    title: "Eternal Beauty",
-    subtitle: "For every precious moment",
-  },
+  { image: heroImage1 },
+  { image: heroImage2 },
+  { image: heroImage3 },
 ];
 
 export const HeroCarousel = () => {
@@ -47,26 +35,9 @@ export const HeroCarousel = () => {
         >
           <img
             src={slide.image}
-            alt={slide.title}
+            alt={`Aurora Cadence Jewelry ${index + 1}`}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center space-y-4 px-4">
-              <h1 className="text-5xl md:text-7xl font-serif text-gold animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                {slide.title}
-              </h1>
-              <p className="text-xl md:text-2xl text-foreground animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-                {slide.subtitle}
-              </p>
-              <Button
-                size="lg"
-                className="bg-gold text-background hover:bg-gold-dark mt-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500"
-              >
-                Explore Collection
-              </Button>
-            </div>
-          </div>
         </div>
       ))}
       
