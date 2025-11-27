@@ -52,13 +52,13 @@ export const CategorySection = () => {
           LUXURY MOODS
         </h1>
 
-        {/* 3D Carousel Container */}
-        <div className="relative w-full max-w-[120rem] mx-auto h-[450px] mt-20 px-4" style={{ perspective: '1200px' }}>
+        {/* Carousel Container */}
+        <div className="relative w-full max-w-7xl mx-auto h-[500px] mt-20 px-4">
           {/* Navigation Arrows */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-foreground/60 text-background hover:bg-foreground/80 hover:scale-110 transition-all"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 text-foreground hover:bg-white shadow-lg"
             onClick={prevSlide}
           >
             <ChevronLeft className="h-6 w-6" />
@@ -67,57 +67,58 @@ export const CategorySection = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-foreground/60 text-background hover:bg-foreground/80 hover:scale-110 transition-all"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 text-foreground hover:bg-white shadow-lg"
             onClick={nextSlide}
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
 
           {/* Cards Track */}
-          <div className="relative w-full h-full flex justify-center items-center" style={{ transformStyle: 'preserve-3d' }}>
+          <div className="relative w-full h-full flex justify-center items-center overflow-visible">
             {categories.map((category, index) => {
               const cardClass = getCardClass(index);
-              
-              const isHovered = hoveredIndex === index;
               
               return (
                 <div
                   key={category.name}
                   onClick={() => updateCarousel(index)}
                   onMouseEnter={() => updateCarousel(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden cursor-pointer ${
+                  className={`absolute h-[450px] bg-card rounded-2xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
                   style={{
-                    transformStyle: 'preserve-3d',
-                    transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                     boxShadow: cardClass === 'center' 
-                      ? '0 30px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(212, 175, 55, 0.2)' 
-                      : '0 20px 40px rgba(0, 0, 0, 0.15)',
+                      ? '0 20px 40px rgba(0, 0, 0, 0.3)' 
+                      : '0 10px 20px rgba(0, 0, 0, 0.15)',
                     ...(cardClass === 'center' && {
                       zIndex: 10,
-                      transform: 'scale(1.15) translateZ(0) rotateY(0deg)',
+                      width: '380px',
+                      transform: 'scale(1)',
                     }),
                     ...(cardClass === 'left-1' && {
                       zIndex: 5,
-                      transform: 'translateX(-220px) scale(0.92) translateZ(-80px) rotateY(15deg)',
-                      opacity: 0.85,
+                      width: '320px',
+                      transform: 'translateX(-380px) scale(0.9)',
+                      opacity: 0.9,
                     }),
                     ...(cardClass === 'left-2' && {
-                      zIndex: 1,
-                      transform: 'translateX(-420px) scale(0.82) translateZ(-250px) rotateY(25deg)',
-                      opacity: 0.6,
+                      zIndex: 3,
+                      width: '280px',
+                      transform: 'translateX(-700px) scale(0.8)',
+                      opacity: 0.7,
                     }),
                     ...(cardClass === 'right-1' && {
                       zIndex: 5,
-                      transform: 'translateX(220px) scale(0.92) translateZ(-80px) rotateY(-15deg)',
-                      opacity: 0.85,
+                      width: '320px',
+                      transform: 'translateX(380px) scale(0.9)',
+                      opacity: 0.9,
                     }),
                     ...(cardClass === 'right-2' && {
-                      zIndex: 1,
-                      transform: 'translateX(420px) scale(0.82) translateZ(-250px) rotateY(-25deg)',
-                      opacity: 0.6,
+                      zIndex: 3,
+                      width: '280px',
+                      transform: 'translateX(700px) scale(0.8)',
+                      opacity: 0.7,
                     }),
                   }}
                 >
@@ -126,34 +127,27 @@ export const CategorySection = () => {
                     alt={category.name}
                     className="w-full h-full object-cover"
                     style={{
-                      transition: 'filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      transition: 'filter 0.5s ease',
                       filter: cardClass === 'center' 
                         ? 'none' 
-                        : 'grayscale(100%) brightness(0.8)',
+                        : 'brightness(0.7)',
                     }}
                   />
                   
-                  {/* Category Name Overlay on Card */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
-                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-600 ${
-                      cardClass === 'center' 
-                        ? 'opacity-100 translate-y-0 scale-100' 
-                        : 'opacity-60 translate-y-2 scale-95'
-                    }`}>
-                      {category.name}
-                    </h3>
-                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-600 ${
+                  {/* Category Name Overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 bg-gradient-to-t from-black/60 via-transparent to-transparent">
+                    <div className={`text-center transition-all duration-500 ${
                       cardClass === 'center' 
                         ? 'opacity-100 translate-y-0' 
-                        : 'opacity-40 translate-y-1'
+                        : 'opacity-70 translate-y-2'
                     }`}>
-                      {category.description}
-                    </p>
-                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-600 ${
-                      cardClass === 'center' 
-                        ? 'opacity-100 scale-100' 
-                        : 'opacity-40 scale-75'
-                    }`} />
+                      <h3 className="text-2xl font-medium text-white uppercase tracking-[0.3em] mb-1">
+                        {category.name}
+                      </h3>
+                      {cardClass === 'center' && (
+                        <div className="w-20 h-[2px] bg-white mx-auto mt-3" />
+                      )}
+                    </div>
                   </div>
                 </div>
               );
