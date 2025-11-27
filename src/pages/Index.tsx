@@ -4,6 +4,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategoryShowcase } from "@/components/CategoryShowcase";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Banner } from "@/components/Banner";
+import { BannerLuxury } from "@/components/BannerLuxury";
 import { CategorySection } from "@/components/CategorySection";
 import { GiftGuide } from "@/components/GiftGuide";
 import { ReviewSection } from "@/components/ReviewSection";
@@ -34,6 +35,8 @@ const Index = () => {
       </section>
 
       <CategorySection />
+
+      <BannerLuxury />
 
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
