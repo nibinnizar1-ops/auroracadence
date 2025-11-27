@@ -15,13 +15,9 @@ const categories = [
 
 export const CategorySection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   const updateCarousel = (newIndex: number) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
     setCurrentIndex((newIndex + categories.length) % categories.length);
-    setTimeout(() => setIsAnimating(false), 1000);
   };
 
   const nextSlide = () => updateCarousel(currentIndex + 1);
@@ -91,7 +87,7 @@ export const CategorySection = () => {
                   }`}
                   style={{
                     transformStyle: 'preserve-3d',
-                    transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    transition: 'all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                     boxShadow: cardClass === 'center' 
                       ? '0 25px 50px rgba(0, 0, 0, 0.25)' 
                       : '0 20px 40px rgba(0, 0, 0, 0.15)',
@@ -126,24 +122,24 @@ export const CategorySection = () => {
                     alt={category.name}
                     className="w-full h-full object-cover"
                     style={{
-                      transition: 'filter 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      transition: 'filter 0.7s ease-out',
                       filter: cardClass === 'center' ? 'none' : 'grayscale(100%) brightness(0.8)',
                     }}
                   />
                   
                   {/* Category Name Overlay on Card */}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
-                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-1000 ${
+                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-700 ${
                       cardClass === 'center' ? 'opacity-100 translate-y-0' : 'opacity-70 translate-y-2'
                     }`}>
                       {category.name}
                     </h3>
-                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-1000 ${
+                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-700 ${
                       cardClass === 'center' ? 'opacity-100' : 'opacity-50'
                     }`}>
                       {category.description}
                     </p>
-                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-1000 ${
+                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-700 ${
                       cardClass === 'center' ? 'opacity-100 scale-100' : 'opacity-50 scale-75'
                     }`} />
                   </div>
