@@ -71,20 +71,22 @@ export const GiftGuide = () => {
         .gift-card {
           box-shadow: -1rem 0 3rem rgba(0, 0, 0, 0.3);
           transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-          transform: translateX(0) translateY(0);
         }
 
         .gift-card:hover {
-          transform: translateY(-20px) translateX(0);
+          transform: translateY(-20px);
           z-index: 100 !important;
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .gift-card:hover ~ .gift-card {
-          transform: translateX(80px) translateY(0);
+          transform: translateX(80px);
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .gift-card:has(~ .gift-card:hover) {
-          transform: translateX(-80px) translateY(0);
+          transform: translateX(-80px);
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @media (max-width: 1024px) {
@@ -99,11 +101,13 @@ export const GiftGuide = () => {
           }
 
           .gift-card:hover ~ .gift-card {
-            transform: translateX(60px) translateY(0);
+            transform: translateX(60px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
           
           .gift-card:has(~ .gift-card:hover) {
-            transform: translateX(-60px) translateY(0);
+            transform: translateX(-60px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
         }
 
@@ -115,11 +119,13 @@ export const GiftGuide = () => {
           }
 
           .gift-card:hover ~ .gift-card {
-            transform: translateX(40px) translateY(0);
+            transform: translateX(40px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
           
           .gift-card:has(~ .gift-card:hover) {
-            transform: translateX(-40px) translateY(0);
+            transform: translateX(-40px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           }
         }
       `}</style>
