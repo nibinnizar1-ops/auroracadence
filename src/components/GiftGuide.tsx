@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import cardWife from "@/assets/card-wife.jpg";
+import cardGirlfriend from "@/assets/card-girlfriend.jpg";
+import cardMom from "@/assets/card-mom.jpg";
+import cardSister from "@/assets/card-sister.jpg";
+import cardDaughter from "@/assets/card-daughter.jpg";
+import cardFriend from "@/assets/card-friend.jpg";
 import giftWife from "@/assets/gift-wife.jpg";
 import giftGirlfriend from "@/assets/gift-girlfriend.jpg";
 import giftMom from "@/assets/gift-mom.jpg";
@@ -8,12 +14,12 @@ import giftDaughter from "@/assets/gift-daughter.jpg";
 import giftFriend from "@/assets/gift-friend.jpg";
 
 const giftCategories = [
-  { name: "For Your Wife", icon: "💍", description: "Elegant pieces that celebrate your eternal bond", image: giftWife },
-  { name: "For Your Girlfriend", icon: "💝", description: "Romantic jewelry to express your love", image: giftGirlfriend },
-  { name: "For Your Mom", icon: "🌸", description: "Timeless gifts to honor her grace", image: giftMom },
-  { name: "For Your Sister", icon: "✨", description: "Beautiful pieces for your best friend", image: giftSister },
-  { name: "For Your Daughter", icon: "🎀", description: "Precious treasures for your little one", image: giftDaughter },
-  { name: "For Your Best Friend", icon: "💎", description: "Sparkling gifts for lifelong friendship", image: giftFriend },
+  { name: "WIFE", label: "Gifts for", illustration: cardWife, jewelry: giftWife },
+  { name: "GIRLFRIEND", label: "Gifts for", illustration: cardGirlfriend, jewelry: giftGirlfriend },
+  { name: "MOM", label: "Gifts for", illustration: cardMom, jewelry: giftMom },
+  { name: "SISTER", label: "Gifts for", illustration: cardSister, jewelry: giftSister },
+  { name: "DAUGHTER", label: "Gifts for", illustration: cardDaughter, jewelry: giftDaughter },
+  { name: "BEST FRIEND", label: "Gifts for", illustration: cardFriend, jewelry: giftFriend },
 ];
 
 export const GiftGuide = () => {
@@ -55,7 +61,7 @@ export const GiftGuide = () => {
           </p>
         </div>
 
-        <div className="relative flex items-center justify-center min-h-[400px]">
+        <div className="relative flex items-center justify-center min-h-[500px]">
           <button
             onClick={handlePrev}
             className="absolute left-4 md:left-8 z-30 w-12 h-12 flex items-center justify-center rounded-full bg-background/80 hover:bg-background border border-border hover:border-foreground transition-all shadow-lg"
@@ -64,28 +70,49 @@ export const GiftGuide = () => {
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="relative w-full max-w-[280px] h-[320px]">
+          <div className="relative w-full max-w-[340px] h-[420px]">
             {giftCategories.map((category, index) => (
               <div
                 key={category.name}
-                className={`gift-card ${getCardClass(index)} absolute left-1/2 top-1/2 w-[280px] h-[320px] -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl overflow-hidden shadow-elegant transition-all duration-500 ease-out`}
+                className={`gift-card ${getCardClass(index)} absolute left-1/2 top-1/2 w-[340px] h-[420px] -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-out`}
               >
-                <div className="relative h-full flex flex-col">
-                  <div className="relative h-48 overflow-hidden">
+                <div className="relative h-full">
+                  {/* Main card with illustration */}
+                  <div className="relative h-full bg-gradient-to-br from-[#f5e6e8] to-[#e8d5d3] rounded-3xl overflow-hidden border-4 border-[#d4b5a7] shadow-2xl">
                     <img 
-                      src={category.image} 
+                      src={category.illustration} 
                       alt={category.name}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+                    
+                    {/* Text overlay at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/40 via-black/20 to-transparent">
+                      <p className="text-white/90 text-sm font-light tracking-wider mb-1 text-center">
+                        {category.label}
+                      </p>
+                      <h3 className="text-white text-3xl font-serif italic font-bold text-center tracking-wide drop-shadow-lg">
+                        {category.name}
+                      </h3>
+                    </div>
                   </div>
-                  <div className="flex-1 flex flex-col justify-center p-6 -mt-8 relative z-10">
-                    <h3 className="text-xl font-semibold text-foreground mb-2">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {category.description}
-                    </p>
+                  
+                  {/* Decorative jewelry piece overlay - bottom right */}
+                  <div className="absolute -bottom-8 -right-8 w-48 h-48 pointer-events-none">
+                    <img 
+                      src={category.jewelry} 
+                      alt="Jewelry"
+                      className="w-full h-full object-contain drop-shadow-2xl"
+                      style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.3))' }}
+                    />
+                  </div>
+                  
+                  {/* Small jewelry accent - top left */}
+                  <div className="absolute -top-4 -left-4 w-20 h-20 pointer-events-none opacity-90">
+                    <img 
+                      src={category.jewelry} 
+                      alt="Jewelry accent"
+                      className="w-full h-full object-contain drop-shadow-xl scale-75"
+                    />
                   </div>
                 </div>
               </div>
@@ -123,11 +150,11 @@ export const GiftGuide = () => {
         }
 
         .gift-card.prev-1 {
-          transform: translate(-50%, -50%) translateX(-240px) rotate(-12deg) translateY(30px);
+          transform: translate(-50%, -50%) translateX(-280px) rotate(-12deg) translateY(40px);
         }
 
         .gift-card.next-1 {
-          transform: translate(-50%, -50%) translateX(240px) rotate(12deg) translateY(30px);
+          transform: translate(-50%, -50%) translateX(280px) rotate(12deg) translateY(40px);
         }
 
         .gift-card.prev-2,
@@ -138,11 +165,11 @@ export const GiftGuide = () => {
         }
 
         .gift-card.prev-2 {
-          transform: translate(-50%, -50%) translateX(-450px) rotate(-20deg) translateY(80px);
+          transform: translate(-50%, -50%) translateX(-520px) rotate(-20deg) translateY(100px);
         }
 
         .gift-card.next-2 {
-          transform: translate(-50%, -50%) translateX(450px) rotate(20deg) translateY(80px);
+          transform: translate(-50%, -50%) translateX(520px) rotate(20deg) translateY(100px);
         }
 
         .gift-card.prev-3,
@@ -154,11 +181,11 @@ export const GiftGuide = () => {
         }
 
         .gift-card.prev-3 {
-          transform: translate(-50%, -50%) translateX(-650px) rotate(-25deg) translateY(150px);
+          transform: translate(-50%, -50%) translateX(-750px) rotate(-25deg) translateY(170px);
         }
 
         .gift-card.next-3 {
-          transform: translate(-50%, -50%) translateX(650px) rotate(25deg) translateY(150px);
+          transform: translate(-50%, -50%) translateX(750px) rotate(25deg) translateY(170px);
         }
       `}</style>
     </section>
