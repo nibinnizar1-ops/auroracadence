@@ -44,7 +44,7 @@ export const HeroCarousel = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground hover:text-gold hover:bg-background/20"
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-background hover:text-foreground bg-foreground/80 hover:bg-background/80"
         onClick={prevSlide}
       >
         <ChevronLeft className="h-8 w-8" />
@@ -53,7 +53,7 @@ export const HeroCarousel = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground hover:text-gold hover:bg-background/20"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-background hover:text-foreground bg-foreground/80 hover:bg-background/80"
         onClick={nextSlide}
       >
         <ChevronRight className="h-8 w-8" />
@@ -64,7 +64,7 @@ export const HeroCarousel = () => {
           <button
             key={index}
             className={`w-2 h-2 rounded-full transition-all ${
-              index === currentSlide ? "bg-gold w-8" : "bg-foreground/50"
+              index === currentSlide ? "bg-foreground w-8" : "bg-background/70"
             }`}
             onClick={() => setCurrentSlide(index)}
           />

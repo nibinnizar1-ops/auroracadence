@@ -10,11 +10,11 @@ const giftCategories = [
 
 export const GiftGuide = () => {
   return (
-    <section className="py-20 bg-secondary/20">
+    <section className="py-20 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <Heart className="w-12 h-12 text-gold mx-auto mb-4" />
-          <h2 className="text-4xl font-serif text-gold mb-4">
+          <Heart className="w-12 h-12 text-accent mx-auto mb-4" />
+          <h2 className="text-4xl font-serif text-foreground mb-4">
             Timeless Gifts For Every Relationship
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -25,10 +25,10 @@ export const GiftGuide = () => {
           {giftCategories.map((category) => (
             <Card
               key={category.name}
-              className="group p-8 text-center border-border hover:border-gold transition-all cursor-pointer hover:shadow-lg"
+              className="group p-8 text-center border-border hover:border-foreground transition-all cursor-pointer hover:shadow-lg"
             >
               <div className="text-6xl mb-4">{category.icon}</div>
-              <h3 className="text-lg font-medium text-foreground group-hover:text-gold transition-colors">
+              <h3 className="text-lg font-medium text-foreground group-hover:text-accent transition-colors">
                 {category.name}
               </h3>
             </Card>

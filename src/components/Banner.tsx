@@ -11,15 +11,15 @@ export const Banner = () => {
             alt="Aurora Cadence Collection"
             className="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center">
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent flex items-center">
             <div className="px-12 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-serif text-gold">
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground">
                 Exclusive Collection
               </h2>
-              <p className="text-xl text-foreground max-w-md">
+              <p className="text-xl text-muted-foreground max-w-md">
                 Discover our handcrafted masterpieces designed for the modern woman
               </p>
-              <Button className="bg-gold text-background hover:bg-gold-dark">
+              <Button className="bg-foreground text-background hover:bg-foreground/90">
                 Shop Now
               </Button>
             </div>
