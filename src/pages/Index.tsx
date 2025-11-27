@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { OfferBanner } from "@/components/OfferBanner";
 import { Navigation } from "@/components/Navigation";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategoryShowcase } from "@/components/CategoryShowcase";
@@ -17,6 +18,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <OfferBanner />
       <Navigation />
       
       <HeroCarousel />
