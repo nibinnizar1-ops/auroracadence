@@ -37,7 +37,7 @@ export const CategoryShowcase = () => {
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-serif text-center text-foreground mb-12 tracking-wide">
+        <h2 className="text-3xl md:text-4xl text-center text-foreground mb-12 tracking-wide font-semibold">
           EVERYDAY LUXURY JEWELLERY
         </h2>
         

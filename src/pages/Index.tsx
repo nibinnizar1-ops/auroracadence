@@ -29,7 +29,7 @@ const Index = () => {
 
       <section id="top-styles" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-serif text-foreground text-center mb-12 uppercase tracking-wide">
+          <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-center mb-12 uppercase tracking-wide">
             Aurora's TOP STYLES
           </h2>
           <FilteredProductGrid />
@@ -45,7 +45,7 @@ const Index = () => {
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Our Collection
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -60,7 +60,7 @@ const Index = () => {
 
       <footer className="py-12 border-t border-border bg-secondary/20">
         <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl font-serif text-foreground mb-4">Aurora Cadence</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-4">Aurora Cadence</h3>
           <p className="text-muted-foreground mb-4">Timeless Elegance, Crafted With Love</p>
           <div className="flex justify-center gap-8 text-sm text-muted-foreground">
             <a href="#about" className="hover:text-foreground transition-colors">About</a>

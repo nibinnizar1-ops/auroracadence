@@ -76,7 +76,7 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-2xl font-serif text-foreground mb-4">Product Not Found</h2>
+          <h2 className="text-2xl font-semibold text-foreground mb-4">Product Not Found</h2>
           <Link to="/">
             <Button className="bg-foreground text-background hover:bg-foreground/90">
               Return to Home
@@ -122,7 +122,7 @@ export default function ProductDetail() {
 
           <div className="space-y-6">
             <div>
-              <h1 className="text-4xl font-serif text-foreground mb-2">{product.title}</h1>
+              <h1 className="text-4xl font-bold text-foreground mb-2">{product.title}</h1>
               <p className="text-3xl font-semibold text-foreground">
                 {selectedVariant?.price.currencyCode} {parseFloat(selectedVariant?.price.amount || "0").toFixed(2)}
               </p>

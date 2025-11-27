@@ -32,7 +32,7 @@ export const ReviewSection = () => {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-serif text-foreground text-center mb-12">
+        <h2 className="text-4xl font-bold text-foreground text-center mb-12">
           What Our Customers Say
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
