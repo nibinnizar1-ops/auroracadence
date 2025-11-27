@@ -42,7 +42,7 @@ export const CategorySection = () => {
         <h1 
           className="absolute top-12 left-1/2 -translate-x-1/2 text-[6rem] md:text-[7.5rem] font-black uppercase tracking-tighter pointer-events-none whitespace-nowrap"
           style={{
-            background: 'linear-gradient(to bottom, hsl(var(--foreground) / 0.15) 30%, transparent 76%)',
+            background: 'linear-gradient(to bottom, hsl(var(--foreground) / 0.3) 30%, transparent 76%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             color: 'transparent',
