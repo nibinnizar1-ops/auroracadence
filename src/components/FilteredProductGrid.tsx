@@ -103,17 +103,12 @@ export const FilteredProductGrid = () => {
           >
             {/* Badge */}
             {product.badge && (
-              <div className="absolute top-3 left-3 bg-background/95 backdrop-blur-sm px-3 py-1 z-10">
+              <div className="absolute top-3 right-3 bg-background/95 backdrop-blur-sm px-3 py-1 z-10">
                 <span className="text-xs font-medium uppercase tracking-wider">
                   {product.badge}
                 </span>
               </div>
             )}
-
-            {/* Wishlist Button */}
-            <button className="absolute top-3 right-3 bg-background/95 backdrop-blur-sm p-2 rounded-full hover:bg-foreground hover:text-background transition-all z-10">
-              <Heart className="h-4 w-4" />
-            </button>
 
             {/* Product Image */}
             <div className="aspect-square overflow-hidden">
@@ -125,19 +120,37 @@ export const FilteredProductGrid = () => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4 space-y-2 text-center">
-              <h3 className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2">
+            <div className="p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                {/* Wishlist Button */}
+                <button className="p-0 hover:text-foreground/60 transition-colors">
+                  <Heart className="h-5 w-5" />
+                </button>
+                
+                {/* ADD TO BAG Button */}
+                <Button 
+                  variant="ghost" 
+                  className="text-xs uppercase tracking-wider px-0 hover:bg-transparent hover:text-foreground/60"
+                >
+                  ADD TO BAG
+                </Button>
+              </div>
+
+              <h3 className="text-sm font-medium text-foreground">
                 {product.name}
               </h3>
-              <p className="text-lg font-semibold text-foreground">
-                ₹ {product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </p>
-              <Button 
-                variant="outline" 
-                className="w-full mt-2 border-foreground hover:bg-foreground hover:text-background"
-              >
-                ADD TO BAG
-              </Button>
+              
+              <div className="flex items-center gap-2">
+                <p className="text-lg font-semibold text-foreground">
+                  ₹ {product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-sm text-muted-foreground line-through">
+                  ₹ {(product.price * 1.38).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-sm font-medium text-green-600">
+                  (38%)
+                </p>
+              </div>
             </div>
           </div>
         ))}
