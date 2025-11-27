@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
+import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
+import heroJewelry2 from "@/assets/hero-jewelry-2.jpg";
+import heroJewelry3 from "@/assets/hero-jewelry-3.jpg";
 
 const categories = [
-  { name: "Office Wear", description: "Professional & Elegant", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=1200&h=800&fit=crop" },
-  { name: "Daily Wear", description: "Comfortable & Chic", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=1200&h=800&fit=crop" },
-  { name: "Party Wear", description: "Bold & Glamorous", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1200&h=800&fit=crop" },
-  { name: "Date Night", description: "Romantic & Sophisticated", image: "https://images.unsplash.com/photo-1588444650700-e6c90f69e4b7?w=1200&h=800&fit=crop" },
-  { name: "Wedding Wear", description: "Timeless & Luxurious", image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1200&h=800&fit=crop" },
+  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1 },
+  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2 },
+  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3 },
+  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1 },
+  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2 },
 ];
 
 export const CategorySection = () => {
@@ -18,7 +21,7 @@ export const CategorySection = () => {
     if (isAnimating) return;
     setIsAnimating(true);
     setCurrentIndex((newIndex + categories.length) % categories.length);
-    setTimeout(() => setIsAnimating(false), 800);
+    setTimeout(() => setIsAnimating(false), 1000);
   };
 
   const nextSlide = () => updateCarousel(currentIndex + 1);
@@ -82,43 +85,49 @@ export const CategorySection = () => {
                 <div
                   key={category.name}
                   onClick={() => updateCarousel(index)}
-                  className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden shadow-2xl cursor-pointer transition-all duration-[800ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                  className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
                   style={{
                     transformStyle: 'preserve-3d',
+                    transition: 'all 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    boxShadow: cardClass === 'center' 
+                      ? '0 25px 50px rgba(0, 0, 0, 0.25)' 
+                      : '0 20px 40px rgba(0, 0, 0, 0.15)',
                     ...(cardClass === 'center' && {
                       zIndex: 10,
-                      transform: 'scale(1.1) translateZ(0)',
+                      transform: 'scale(1.15) translateZ(0) rotateY(0deg)',
                     }),
                     ...(cardClass === 'left-1' && {
                       zIndex: 5,
-                      transform: 'translateX(-200px) scale(0.9) translateZ(-100px)',
-                      opacity: 0.9,
+                      transform: 'translateX(-220px) scale(0.92) translateZ(-80px) rotateY(15deg)',
+                      opacity: 0.85,
                     }),
                     ...(cardClass === 'left-2' && {
                       zIndex: 1,
-                      transform: 'translateX(-400px) scale(0.8) translateZ(-300px)',
-                      opacity: 0.7,
+                      transform: 'translateX(-420px) scale(0.82) translateZ(-250px) rotateY(25deg)',
+                      opacity: 0.6,
                     }),
                     ...(cardClass === 'right-1' && {
                       zIndex: 5,
-                      transform: 'translateX(200px) scale(0.9) translateZ(-100px)',
-                      opacity: 0.9,
+                      transform: 'translateX(220px) scale(0.92) translateZ(-80px) rotateY(-15deg)',
+                      opacity: 0.85,
                     }),
                     ...(cardClass === 'right-2' && {
                       zIndex: 1,
-                      transform: 'translateX(400px) scale(0.8) translateZ(-300px)',
-                      opacity: 0.7,
+                      transform: 'translateX(420px) scale(0.82) translateZ(-250px) rotateY(-25deg)',
+                      opacity: 0.6,
                     }),
                   }}
                 >
                   <img
                     src={category.image}
                     alt={category.name}
-                    className={`w-full h-full object-cover transition-all duration-[800ms] ${
-                      cardClass === 'center' ? '' : 'grayscale'
-                    }`}
+                    className="w-full h-full object-cover"
+                    style={{
+                      transition: 'filter 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      filter: cardClass === 'center' ? 'none' : 'grayscale(100%) brightness(0.8)',
+                    }}
                   />
                 </div>
               );
