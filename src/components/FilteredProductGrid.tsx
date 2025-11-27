@@ -86,7 +86,7 @@ export const FilteredProductGrid = () => {
             className={`px-8 py-3 text-sm font-medium uppercase tracking-wider transition-all ${
               activeFilter === category
                 ? "bg-foreground text-background"
-                : "bg-background text-foreground border-2 border-foreground hover:bg-foreground/5"
+                : "bg-background text-foreground border border-foreground hover:bg-foreground/5"
             }`}
           >
             {category}
