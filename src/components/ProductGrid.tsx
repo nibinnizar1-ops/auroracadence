@@ -65,7 +65,7 @@ export const ProductGrid = () => {
   if (products.length === 0) {
     return (
       <div className="text-center py-20">
-        <h3 className="text-2xl font-serif text-foreground mb-4">No Products Found</h3>
+        <h3 className="text-2xl font-semibold text-foreground mb-4">No Products Found</h3>
         <p className="text-muted-foreground mb-6">
           We're currently setting up our collection. Check back soon!
         </p>
