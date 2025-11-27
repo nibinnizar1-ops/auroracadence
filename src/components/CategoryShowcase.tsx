@@ -41,14 +41,14 @@ export const CategoryShowcase = () => {
           EVERYDAY LUXURY JEWELLERY
         </h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
           {categories.map((category) => (
             <Link
               key={category.name}
               to={category.href}
               className="group relative overflow-hidden bg-secondary/10 border border-border hover:border-foreground transition-all"
             >
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-[4/5] overflow-hidden">
                 <img
                   src={category.image}
                   alt={category.name}
