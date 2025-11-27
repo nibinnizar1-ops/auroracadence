@@ -87,7 +87,7 @@ export const CategorySection = () => {
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
                   style={{
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transition: 'all 1.8s cubic-bezier(0.4, 0, 0.2, 1)',
                     boxShadow: cardClass === 'center'
                       ? '0 20px 40px rgba(0, 0, 0, 0.3)' 
                       : '0 10px 20px rgba(0, 0, 0, 0.15)',
@@ -127,7 +127,7 @@ export const CategorySection = () => {
                     alt={category.name}
                     className="w-full h-full object-cover"
                     style={{
-                      transition: 'filter 0.3s ease',
+                      transition: 'filter 1.8s ease',
                       filter: cardClass === 'center'
                         ? 'none' 
                         : 'brightness(0.7)',
@@ -136,7 +136,7 @@ export const CategorySection = () => {
                   
                   {/* Category Name Overlay */}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 bg-gradient-to-t from-black/60 via-transparent to-transparent">
-                    <div className={`text-center transition-all duration-300 ${
+                    <div className={`text-center transition-all duration-[1800ms] ${
                       cardClass === 'center'
                         ? 'opacity-100 translate-y-0' 
                         : 'opacity-70 translate-y-2'
