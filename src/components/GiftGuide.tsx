@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import giftWife from "@/assets/gift-wife.jpg";
+import giftGirlfriend from "@/assets/gift-girlfriend.jpg";
+import giftMom from "@/assets/gift-mom.jpg";
+import giftSister from "@/assets/gift-sister.jpg";
+import giftDaughter from "@/assets/gift-daughter.jpg";
+import giftFriend from "@/assets/gift-friend.jpg";
 
 const giftCategories = [
-  { name: "For Your Wife", icon: "💍", description: "Elegant pieces that celebrate your eternal bond" },
-  { name: "For Your Girlfriend", icon: "💝", description: "Romantic jewelry to express your love" },
-  { name: "For Your Mom", icon: "🌸", description: "Timeless gifts to honor her grace" },
-  { name: "For Your Sister", icon: "✨", description: "Beautiful pieces for your best friend" },
-  { name: "For Your Daughter", icon: "🎀", description: "Precious treasures for your little one" },
-  { name: "For Your Best Friend", icon: "💎", description: "Sparkling gifts for lifelong friendship" },
+  { name: "For Your Wife", icon: "💍", description: "Elegant pieces that celebrate your eternal bond", image: giftWife },
+  { name: "For Your Girlfriend", icon: "💝", description: "Romantic jewelry to express your love", image: giftGirlfriend },
+  { name: "For Your Mom", icon: "🌸", description: "Timeless gifts to honor her grace", image: giftMom },
+  { name: "For Your Sister", icon: "✨", description: "Beautiful pieces for your best friend", image: giftSister },
+  { name: "For Your Daughter", icon: "🎀", description: "Precious treasures for your little one", image: giftDaughter },
+  { name: "For Your Best Friend", icon: "💎", description: "Sparkling gifts for lifelong friendship", image: giftFriend },
 ];
 
 export const GiftGuide = () => {
@@ -62,15 +68,26 @@ export const GiftGuide = () => {
             {giftCategories.map((category, index) => (
               <div
                 key={category.name}
-                className={`gift-card ${getCardClass(index)} absolute left-1/2 top-1/2 w-[280px] h-[320px] -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-8 text-center shadow-elegant transition-all duration-500 ease-out`}
+                className={`gift-card ${getCardClass(index)} absolute left-1/2 top-1/2 w-[280px] h-[320px] -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl overflow-hidden shadow-elegant transition-all duration-500 ease-out`}
               >
-                <div className="text-7xl mb-6">{category.icon}</div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {category.description}
-                </p>
+                <div className="relative h-full flex flex-col">
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={category.image} 
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/50 to-transparent" />
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center p-6 -mt-8 relative z-10">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {category.description}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
