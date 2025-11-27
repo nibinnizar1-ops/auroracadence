@@ -99,7 +99,7 @@ export const FilteredProductGrid = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="group relative bg-background border border-border hover:border-foreground transition-all cursor-pointer"
+            className="group relative bg-background transition-all cursor-pointer"
           >
             {/* Badge */}
             {product.badge && (
@@ -111,31 +111,32 @@ export const FilteredProductGrid = () => {
             )}
 
             {/* Product Image */}
-            <div className="aspect-square overflow-hidden">
+            <div className="aspect-square overflow-hidden relative">
               <img
                 src={product.image}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-            </div>
-
-            {/* Product Info */}
-            <div className="p-4 space-y-3 flex flex-col items-center text-center">
-              <div className="flex items-center justify-center gap-2 w-full">
-                {/* Wishlist Button */}
-                <button className="p-0 hover:text-foreground/60 transition-colors">
+              
+              {/* Hover Actions - Overlay on Image */}
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-4 py-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/60 to-transparent">
+                {/* Wishlist Button - Left */}
+                <button className="p-2 hover:text-foreground text-white transition-colors" title="Add to wishlist">
                   <Heart className="h-5 w-5" />
                 </button>
                 
-                {/* ADD TO BAG Button */}
+                {/* ADD TO BAG Button - Right */}
                 <Button 
                   variant="ghost" 
-                  className="text-xs uppercase tracking-wider px-0 hover:bg-transparent hover:text-foreground/60"
+                  className="text-xs uppercase tracking-wider px-4 hover:bg-white/20 text-white border border-white/50 hover:border-white"
                 >
                   ADD TO BAG
                 </Button>
               </div>
+            </div>
 
+            {/* Product Info - Centered */}
+            <div className="p-4 space-y-2 flex flex-col items-center text-center">
               <h3 className="text-sm font-medium text-foreground">
                 {product.name}
               </h3>
