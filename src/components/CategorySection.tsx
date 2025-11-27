@@ -143,7 +143,17 @@ export const CategorySection = () => {
                   />
                   
                   {/* Category Name Overlay on Card */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
+                  <div 
+                    className="absolute inset-0 flex flex-col items-center justify-end pb-8 pointer-events-none"
+                    style={{
+                      background: cardClass === 'center'
+                        ? 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2), transparent)'
+                        : isHovered
+                          ? 'linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.35), rgba(0,0,0,0.1))'
+                          : 'linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2), transparent)',
+                      transition: 'background 0.5s ease-out',
+                    }}
+                  >
                     <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-500 ${
                       cardClass === 'center' 
                         ? 'opacity-100 translate-y-0' 
