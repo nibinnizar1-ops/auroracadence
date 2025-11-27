@@ -23,34 +23,29 @@ export const GiftGuide = () => {
 
     const cards = cardsContainer.querySelectorAll(".gift-card");
     const total = cards.length;
-    const radius = 500;
-    const curvature = 10;
+    const radius = 400;
 
     // Distribute cards in cylindrical layout
-    Array.from(cards).reverse().forEach((card, i) => {
+    Array.from(cards).forEach((card, i) => {
       const angle = (i / total) * Math.PI * 2;
-      const y = Math.sin(angle) * radius;
-      const z = Math.cos(angle) * radius;
-      const tilt = (Math.sin(angle) * curvature).toFixed(2);
 
       (card as HTMLElement).style.transform = `
         rotateX(${(angle * 180) / Math.PI}deg)
         translateZ(${radius}px)
-        rotateY(${tilt}deg)
       `;
     });
 
     // Scroll-based rotation
     const handleScroll = () => {
       const rect = section.getBoundingClientRect();
-      const sectionTop = rect.top;
-      const sectionHeight = rect.height;
       const windowHeight = window.innerHeight;
+      const sectionHeight = rect.height;
 
-      // Calculate scroll progress within the section
-      if (sectionTop < windowHeight && sectionTop + sectionHeight > 0) {
-        const scrollProgress = (windowHeight - sectionTop) / (windowHeight + sectionHeight);
-        const rotation = scrollProgress * 360;
+      // Only animate when section is in view
+      if (rect.top <= windowHeight && rect.bottom >= 0) {
+        // Calculate progress: 0 when section enters, 1 when it leaves
+        const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (windowHeight + sectionHeight * 0.5)));
+        const rotation = progress * 360 * 1.5; // 1.5 full rotations
         cardsContainer.style.transform = `rotateX(${rotation}deg)`;
       }
     };
@@ -64,8 +59,8 @@ export const GiftGuide = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-32 bg-gradient-to-b from-background to-secondary/30 overflow-hidden">
-      <div className="container mx-auto px-4 mb-16 text-center relative z-10">
+    <section ref={sectionRef} className="relative h-[300vh] bg-gradient-to-b from-background to-secondary/30 overflow-hidden">
+      <div className="container mx-auto px-4 pt-32 pb-16 text-center relative z-10">
         <Heart className="w-12 h-12 text-accent mx-auto mb-4 animate-pulse" />
         <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">
           Timeless Gifts For Every Relationship
@@ -76,24 +71,24 @@ export const GiftGuide = () => {
       </div>
 
       {/* 3D Carousel Scene */}
-      <div className="gift-scene sticky top-0 h-[100vh] flex items-center justify-center" style={{ perspective: "1200px" }}>
+      <div className="gift-scene sticky top-0 h-[100vh] flex items-center justify-center" style={{ perspective: "1500px" }}>
         <div
           ref={cardsContainerRef}
           className="gift-cards-container relative"
           style={{
-            width: "300px",
-            height: "450px",
+            width: "320px",
+            height: "480px",
             transformStyle: "preserve-3d",
-            transition: "transform 0.1s ease-out",
+            transition: "transform 0.15s ease-out",
           }}
         >
           {giftCategories.map((category, index) => (
             <div
               key={category.name}
-              className="gift-card absolute inset-0 rounded-3xl overflow-hidden shadow-2xl cursor-pointer"
+              className="gift-card absolute inset-0 rounded-2xl overflow-hidden shadow-2xl cursor-pointer"
               style={{
-                width: "300px",
-                height: "450px",
+                width: "320px",
+                height: "480px",
                 backfaceVisibility: "hidden",
                 transformOrigin: "center center",
               }}
@@ -104,8 +99,8 @@ export const GiftGuide = () => {
                   alt={category.name}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-8">
-                  <h3 className="text-2xl font-serif text-white group-hover:text-accent transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-8">
+                  <h3 className="text-3xl font-serif text-white group-hover:text-accent transition-colors duration-300">
                     {category.name}
                   </h3>
                 </div>
@@ -118,7 +113,7 @@ export const GiftGuide = () => {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-muted-foreground text-sm animate-bounce">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-muted-foreground text-sm animate-bounce z-10">
         <p>Scroll to explore</p>
       </div>
     </section>
