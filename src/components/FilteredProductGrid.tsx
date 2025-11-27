@@ -95,7 +95,7 @@ export const FilteredProductGrid = () => {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
@@ -125,7 +125,7 @@ export const FilteredProductGrid = () => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4 space-y-2">
+            <div className="p-4 space-y-2 text-center">
               <h3 className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors line-clamp-2">
                 {product.name}
               </h3>
