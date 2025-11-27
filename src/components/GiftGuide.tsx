@@ -24,15 +24,18 @@ const giftCategories = [
 
 export const GiftGuide = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const totalCards = giftCategories.length;
 
   useEffect(() => {
+    if (isPaused) return;
+    
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalCards);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [totalCards]);
+  }, [totalCards, isPaused]);
 
   const getCardClass = (index: number) => {
     const diff = (index - currentIndex + totalCards) % totalCards;
@@ -78,7 +81,11 @@ export const GiftGuide = () => {
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <div className="relative w-full max-w-[340px] h-[420px]">
+          <div 
+            className="relative w-full max-w-[340px] h-[420px]"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {giftCategories.map((category, index) => (
               <div
                 key={category.name}
@@ -132,6 +139,12 @@ export const GiftGuide = () => {
           transform: translate(-50%, -50%) translateX(0) rotate(0deg) translateY(0) scale(1);
           filter: blur(0) brightness(1);
           pointer-events: auto;
+        }
+
+        .gift-card.active:hover {
+          transform: translate(-50%, -50%) translateX(0) rotate(0deg) translateY(0) scale(1.05);
+          filter: blur(0) brightness(1.1);
+          box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.4);
         }
 
         .gift-card.prev-1,
