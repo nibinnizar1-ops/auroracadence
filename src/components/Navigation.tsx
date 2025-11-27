@@ -25,7 +25,7 @@ export const Navigation = () => {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <Link to="/" className="text-2xl font-serif text-gold">
+          <Link to="/" className="text-2xl font-serif text-foreground hover:text-foreground/80 transition-colors">
             Aurora Cadence
           </Link>
           
@@ -34,7 +34,7 @@ export const Navigation = () => {
               <a
                 key={item.label}
                 href={item.href}
-                className="text-sm text-foreground hover:text-gold transition-colors"
+                className="text-sm text-foreground hover:text-foreground/60 transition-colors"
               >
                 {item.label}
               </a>

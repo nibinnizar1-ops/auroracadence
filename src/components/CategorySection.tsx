@@ -13,13 +13,13 @@ export const CategorySection = () => {
   return (
     <section id="luxury-moods" className="py-20">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-serif text-gold text-center mb-12">
+        <h2 className="text-4xl font-serif text-foreground text-center mb-12">
           Luxury For Every Mood
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {categories.map((category) => (
             <Link key={category.name} to={`#${category.name.toLowerCase().replace(' ', '-')}`}>
-              <Card className="group overflow-hidden border-border hover:border-gold transition-all cursor-pointer">
+              <Card className="group overflow-hidden border-border hover:border-foreground transition-all cursor-pointer hover:shadow-lg">
                 <div className="aspect-square overflow-hidden">
                   <img
                     src={category.image}
@@ -28,7 +28,7 @@ export const CategorySection = () => {
                   />
                 </div>
                 <div className="p-4 text-center">
-                  <h3 className="font-medium text-foreground group-hover:text-gold transition-colors">
+                  <h3 className="font-medium text-foreground group-hover:text-accent transition-colors">
                     {category.name}
                   </h3>
                 </div>

@@ -65,7 +65,7 @@ export const ProductGrid = () => {
   if (products.length === 0) {
     return (
       <div className="text-center py-20">
-        <h3 className="text-2xl font-serif text-gold mb-4">No Products Found</h3>
+        <h3 className="text-2xl font-serif text-foreground mb-4">No Products Found</h3>
         <p className="text-muted-foreground mb-6">
           We're currently setting up our collection. Check back soon!
         </p>
@@ -83,7 +83,7 @@ export const ProductGrid = () => {
         const image = product.node.images.edges[0]?.node;
 
         return (
-          <Card key={product.node.id} className="group overflow-hidden border-border hover:border-gold transition-all">
+          <Card key={product.node.id} className="group overflow-hidden border-border hover:border-foreground transition-all hover:shadow-lg">
             <Link to={`/product/${product.node.handle}`}>
               <div className="aspect-square overflow-hidden bg-secondary">
                 {image && (
@@ -97,18 +97,18 @@ export const ProductGrid = () => {
             </Link>
             <CardContent className="p-4">
               <Link to={`/product/${product.node.handle}`}>
-                <h3 className="font-medium text-foreground group-hover:text-gold transition-colors">
+                <h3 className="font-medium text-foreground group-hover:text-accent transition-colors">
                   {product.node.title}
                 </h3>
               </Link>
-              <p className="text-gold font-semibold mt-2">
+              <p className="text-foreground font-semibold mt-2">
                 {variant?.price.currencyCode} {parseFloat(variant?.price.amount || "0").toFixed(2)}
               </p>
             </CardContent>
             <CardFooter className="p-4 pt-0">
               <Button
                 onClick={() => handleAddToCart(product)}
-                className="w-full bg-gold text-background hover:bg-gold-dark"
+                className="w-full bg-foreground text-background hover:bg-foreground/90"
                 size="sm"
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
