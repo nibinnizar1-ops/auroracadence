@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
-import cardWife from "@/assets/card-wife.jpg";
-import cardGirlfriend from "@/assets/card-girlfriend.jpg";
-import cardMom from "@/assets/card-mom.jpg";
-import cardSister from "@/assets/card-sister.jpg";
-import cardDaughter from "@/assets/card-daughter.jpg";
-import cardFriend from "@/assets/card-friend.jpg";
+import realWife from "@/assets/real-wife.jpg";
+import realGirlfriend from "@/assets/real-girlfriend.jpg";
+import realMom from "@/assets/real-mom.jpg";
+import realSister from "@/assets/real-sister.jpg";
+import realDaughter from "@/assets/real-daughter.jpg";
+import realFriend from "@/assets/real-friend.jpg";
 import giftWife from "@/assets/gift-wife.jpg";
 import giftGirlfriend from "@/assets/gift-girlfriend.jpg";
 import giftMom from "@/assets/gift-mom.jpg";
@@ -14,12 +14,12 @@ import giftDaughter from "@/assets/gift-daughter.jpg";
 import giftFriend from "@/assets/gift-friend.jpg";
 
 const giftCategories = [
-  { name: "WIFE", label: "Gifts for", illustration: cardWife, jewelry: giftWife },
-  { name: "GIRLFRIEND", label: "Gifts for", illustration: cardGirlfriend, jewelry: giftGirlfriend },
-  { name: "MOM", label: "Gifts for", illustration: cardMom, jewelry: giftMom },
-  { name: "SISTER", label: "Gifts for", illustration: cardSister, jewelry: giftSister },
-  { name: "DAUGHTER", label: "Gifts for", illustration: cardDaughter, jewelry: giftDaughter },
-  { name: "BEST FRIEND", label: "Gifts for", illustration: cardFriend, jewelry: giftFriend },
+  { name: "WIFE", label: "Gifts for", illustration: realWife, jewelry: giftWife },
+  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, jewelry: giftGirlfriend },
+  { name: "MOM", label: "Gifts for", illustration: realMom, jewelry: giftMom },
+  { name: "SISTER", label: "Gifts for", illustration: realSister, jewelry: giftSister },
+  { name: "DAUGHTER", label: "Gifts for", illustration: realDaughter, jewelry: giftDaughter },
+  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, jewelry: giftFriend },
 ];
 
 export const GiftGuide = () => {
@@ -85,14 +85,16 @@ export const GiftGuide = () => {
                       className="w-full h-full object-cover"
                     />
                     
-                    {/* Text overlay at bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/40 via-black/20 to-transparent">
-                      <p className="text-white/90 text-sm font-light tracking-wider mb-1 text-center">
-                        {category.label}
-                      </p>
-                      <h3 className="text-white text-3xl font-serif italic font-bold text-center tracking-wide drop-shadow-lg">
-                        {category.name}
-                      </h3>
+                    {/* Text overlay at bottom with enhanced visibility */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+                      <div className="backdrop-blur-[2px] rounded-lg p-2">
+                        <p className="text-white text-xs font-light tracking-[0.3em] uppercase mb-2 text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          {category.label}
+                        </p>
+                        <h3 className="text-white text-3xl font-serif italic font-bold text-center tracking-wide drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
+                          {category.name}
+                        </h3>
+                      </div>
                     </div>
                   </div>
                   
@@ -132,44 +134,47 @@ export const GiftGuide = () => {
       <style>{`
         .gift-card {
           pointer-events: none;
+          transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .gift-card.active {
           opacity: 1;
           z-index: 20;
-          transform: translate(-50%, -50%) translateX(0) rotate(0deg) translateY(0);
-          filter: blur(0);
+          transform: translate(-50%, -50%) translateX(0) rotate(0deg) translateY(0) scale(1);
+          filter: blur(0) brightness(1);
           pointer-events: auto;
         }
 
         .gift-card.prev-1,
         .gift-card.next-1 {
-          opacity: 0.6;
+          opacity: 0.7;
           z-index: 10;
-          filter: blur(2px);
+          filter: blur(1.5px) brightness(0.9);
+          transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .gift-card.prev-1 {
-          transform: translate(-50%, -50%) translateX(-280px) rotate(-12deg) translateY(40px);
+          transform: translate(-50%, -50%) translateX(-280px) rotate(-11deg) translateY(40px) scale(0.85);
         }
 
         .gift-card.next-1 {
-          transform: translate(-50%, -50%) translateX(280px) rotate(12deg) translateY(40px);
+          transform: translate(-50%, -50%) translateX(280px) rotate(11deg) translateY(40px) scale(0.85);
         }
 
         .gift-card.prev-2,
         .gift-card.next-2 {
-          opacity: 0.3;
+          opacity: 0.4;
           z-index: 5;
-          filter: blur(4px);
+          filter: blur(3px) brightness(0.8);
+          transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .gift-card.prev-2 {
-          transform: translate(-50%, -50%) translateX(-520px) rotate(-20deg) translateY(100px);
+          transform: translate(-50%, -50%) translateX(-520px) rotate(-18deg) translateY(100px) scale(0.7);
         }
 
         .gift-card.next-2 {
-          transform: translate(-50%, -50%) translateX(520px) rotate(20deg) translateY(100px);
+          transform: translate(-50%, -50%) translateX(520px) rotate(18deg) translateY(100px) scale(0.7);
         }
 
         .gift-card.prev-3,
@@ -177,15 +182,25 @@ export const GiftGuide = () => {
         .gift-card.hidden-card {
           opacity: 0;
           z-index: 1;
-          filter: blur(6px);
+          filter: blur(5px) brightness(0.7);
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .gift-card.prev-3 {
-          transform: translate(-50%, -50%) translateX(-750px) rotate(-25deg) translateY(170px);
+          transform: translate(-50%, -50%) translateX(-750px) rotate(-22deg) translateY(170px) scale(0.6);
         }
 
         .gift-card.next-3 {
-          transform: translate(-50%, -50%) translateX(750px) rotate(25deg) translateY(170px);
+          transform: translate(-50%, -50%) translateX(750px) rotate(22deg) translateY(170px) scale(0.6);
+        }
+        
+        @media (max-width: 768px) {
+          .gift-card.prev-1 {
+            transform: translate(-50%, -50%) translateX(-200px) rotate(-11deg) translateY(30px) scale(0.85);
+          }
+          .gift-card.next-1 {
+            transform: translate(-50%, -50%) translateX(200px) rotate(11deg) translateY(30px) scale(0.85);
+          }
         }
       `}</style>
     </section>
