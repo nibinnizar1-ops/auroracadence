@@ -120,8 +120,8 @@ export const FilteredProductGrid = () => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2">
+            <div className="p-4 space-y-3 flex flex-col items-center text-center">
+              <div className="flex items-center justify-center gap-2 w-full">
                 {/* Wishlist Button */}
                 <button className="p-0 hover:text-foreground/60 transition-colors">
                   <Heart className="h-5 w-5" />
@@ -140,7 +140,7 @@ export const FilteredProductGrid = () => {
                 {product.name}
               </h3>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <p className="text-lg font-semibold text-foreground">
                   ₹ {product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </p>
