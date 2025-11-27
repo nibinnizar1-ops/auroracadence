@@ -15,6 +15,7 @@ const categories = [
 
 export const CategorySection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const updateCarousel = (newIndex: number) => {
     setCurrentIndex((newIndex + categories.length) % categories.length);
@@ -81,7 +82,11 @@ export const CategorySection = () => {
                 <div
                   key={category.name}
                   onClick={() => updateCarousel(index)}
-                  onMouseEnter={() => updateCarousel(index)}
+                  onMouseEnter={() => {
+                    updateCarousel(index);
+                    setHoveredIndex(index);
+                  }}
+                  onMouseLeave={() => setHoveredIndex(null)}
                   className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
@@ -129,18 +134,18 @@ export const CategorySection = () => {
                   
                   {/* Category Name Overlay on Card */}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
-                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-700 ${
-                      cardClass === 'center' ? 'opacity-100 translate-y-0' : 'opacity-70 translate-y-2'
+                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-300 ${
+                      (cardClass === 'center' || hoveredIndex === index) ? 'opacity-100 translate-y-0' : 'opacity-70 translate-y-2'
                     }`}>
                       {category.name}
                     </h3>
-                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-700 ${
-                      cardClass === 'center' ? 'opacity-100' : 'opacity-50'
+                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-300 ${
+                      (cardClass === 'center' || hoveredIndex === index) ? 'opacity-100' : 'opacity-50'
                     }`}>
                       {category.description}
                     </p>
-                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-700 ${
-                      cardClass === 'center' ? 'opacity-100 scale-100' : 'opacity-50 scale-75'
+                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-300 ${
+                      (cardClass === 'center' || hoveredIndex === index) ? 'opacity-100 scale-100' : 'opacity-50 scale-75'
                     }`} />
                   </div>
                 </div>
