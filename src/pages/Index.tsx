@@ -28,6 +28,8 @@ const Index = () => {
         </div>
       </section>
 
+      <CategorySection />
+
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -41,8 +43,6 @@ const Index = () => {
           <ProductGrid />
         </div>
       </section>
-
-      <CategorySection />
 
       <GiftGuide />
 
