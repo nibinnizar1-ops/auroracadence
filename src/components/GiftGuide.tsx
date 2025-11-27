@@ -11,7 +11,6 @@ const giftCategories = [
   { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500" },
   { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500" },
   { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500" },
-  { name: "DAUGHTER", label: "Gifts for", illustration: realDaughter, color: "from-pink-500 to-rose-500" },
   { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500" },
 ];
 
