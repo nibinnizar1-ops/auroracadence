@@ -16,6 +16,8 @@ const Index = () => {
 
       <CategoryShowcase />
 
+      <Banner />
+
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -29,8 +31,6 @@ const Index = () => {
           <ProductGrid />
         </div>
       </section>
-
-      <Banner />
 
       <section id="top-styles" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
