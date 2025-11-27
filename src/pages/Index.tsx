@@ -1,5 +1,6 @@
 import { Navigation } from "@/components/Navigation";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { CategoryShowcase } from "@/components/CategoryShowcase";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Banner } from "@/components/Banner";
 import { CategorySection } from "@/components/CategorySection";
@@ -13,11 +14,13 @@ const Index = () => {
       
       <HeroCarousel />
 
-      <section id="new-arrivals" className="py-20">
+      <CategoryShowcase />
+
+      <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-5xl font-serif text-foreground mb-4">
-              Everyday Luxury Jewellery
+            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4">
+              Our Collection
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Discover our curated collection of timeless pieces designed for the modern woman
