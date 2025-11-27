@@ -55,8 +55,8 @@ export const CategoryShowcase = () => {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm py-3 px-2 border-t border-border">
-                <h3 className="text-xs md:text-sm font-medium text-foreground text-center uppercase tracking-wider">
+              <div className="absolute bottom-0 left-0 right-0 py-3 px-2">
+                <h3 className="text-xs md:text-sm font-medium text-white text-center uppercase tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                   {category.name}
                 </h3>
               </div>
