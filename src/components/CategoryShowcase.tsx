@@ -4,32 +4,32 @@ const categories = [
   { 
     name: "New Arrivals", 
     image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop&q=80",
-    href: "#new-arrivals"
+    href: "/new-arrivals"
   },
   { 
     name: "Bestseller", 
     image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=600&fit=crop&q=80",
-    href: "#bestseller"
+    href: "/collections"
   },
   { 
     name: "Necklaces", 
     image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=600&h=600&fit=crop&q=80",
-    href: "#necklaces"
+    href: "/collections"
   },
   { 
     name: "Rings", 
     image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop&q=80",
-    href: "#rings"
+    href: "/collections"
   },
   { 
     name: "Earrings", 
     image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&h=600&fit=crop&q=80",
-    href: "#earrings"
+    href: "/collections"
   },
   { 
     name: "Bracelets", 
     image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&h=600&fit=crop&q=80",
-    href: "#bracelets"
+    href: "/collections"
   },
 ];
 

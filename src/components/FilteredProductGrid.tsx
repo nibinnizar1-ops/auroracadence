@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
 
@@ -97,8 +98,9 @@ export const FilteredProductGrid = () => {
       {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {filteredProducts.map((product) => (
-          <div
+          <Link
             key={product.id}
+            to="/collections"
             className="group relative bg-background transition-all cursor-pointer"
           >
             {/* Badge */}
@@ -153,7 +155,7 @@ export const FilteredProductGrid = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

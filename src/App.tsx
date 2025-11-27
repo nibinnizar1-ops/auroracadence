@@ -6,6 +6,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
+import NewArrivals from "./pages/NewArrivals";
+import OfficeWear from "./pages/OfficeWear";
+import DailyWear from "./pages/DailyWear";
+import PartyWear from "./pages/PartyWear";
+import DateNight from "./pages/DateNight";
+import WeddingWear from "./pages/WeddingWear";
+import Collections from "./pages/Collections";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +27,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/product/:handle" element={<ProductDetail />} />
+          <Route path="/new-arrivals" element={<NewArrivals />} />
+          <Route path="/office-wear" element={<OfficeWear />} />
+          <Route path="/daily-wear" element={<DailyWear />} />
+          <Route path="/party-wear" element={<PartyWear />} />
+          <Route path="/date-night" element={<DateNight />} />
+          <Route path="/wedding-wear" element={<WeddingWear />} />
+          <Route path="/collections" element={<Collections />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
