@@ -7,10 +7,10 @@ export const OfferBanner = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="relative w-full bg-gradient-to-r from-accent via-primary to-accent text-primary-foreground py-2.5 px-4">
+    <div className="relative w-full bg-black text-white py-2.5 px-4">
       <div className="container mx-auto flex items-center justify-center gap-4">
         <p className="text-xs sm:text-sm font-medium text-center">
-          🎁 Get 50% Worth ₹7,495 On Brand Order Above ₹8999 Total Worth Free 🎁
+          🎁 Buy 1 Get 1 Free : BUY2 🎁
         </p>
         <button
           onClick={() => setIsVisible(false)}
