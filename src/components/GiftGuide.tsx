@@ -48,53 +48,18 @@ export const GiftGuide = () => {
                     alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
                 </div>
 
-                {/* Progress Bar */}
-                <div className="absolute top-6 left-6 right-6 z-10">
-                  <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                    <div className={`h-full bg-gradient-to-r ${category.color} transition-all duration-500 w-0 group-hover:w-3/4 rounded-full`} />
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="relative h-full flex flex-col justify-between p-6 z-10">
-                  <div>
-                    <p className="text-white/80 text-xs font-light tracking-[0.3em] uppercase mb-1">
+                {/* Content - Centered Vertically */}
+                <div className="relative h-full flex flex-col items-center justify-center text-center p-6 z-10">
+                  <div className="space-y-3">
+                    <p className="text-white text-sm font-light tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                       {category.label}
                     </p>
-                    <h3 className="text-white text-2xl font-bold tracking-wide">
+                    <h3 className="text-white text-3xl font-bold tracking-wide leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
                       {category.name}
                     </h3>
-                  </div>
-
-                  {/* Animated Circle */}
-                  <div className="flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <svg width="100" height="100" className="transform -rotate-90">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        stroke="white"
-                        strokeWidth="2"
-                        fill="none"
-                        className="transition-all duration-700 opacity-30"
-                        strokeDasharray="283"
-                        strokeDashoffset="283"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="45"
-                        stroke="white"
-                        strokeWidth="2"
-                        fill="none"
-                        className="transition-all duration-700 circle-progress"
-                        strokeDasharray="283"
-                        strokeDashoffset="283"
-                      />
-                    </svg>
                   </div>
                 </div>
               </div>
@@ -115,10 +80,6 @@ export const GiftGuide = () => {
 
         .gift-card:hover ~ .gift-card {
           transform: translateX(80px);
-        }
-
-        .gift-card:hover .circle-progress {
-          stroke-dashoffset: 100;
         }
 
         @media (max-width: 1024px) {
