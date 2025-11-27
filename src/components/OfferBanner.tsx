@@ -8,7 +8,7 @@ export const OfferBanner = () => {
 
   return (
     <div className="relative w-full bg-black text-white py-2.5 px-4">
-      <div className="container mx-auto flex items-center justify-center gap-4">
+      <div className="container mx-auto max-w-4xl flex items-center justify-center gap-4">
         <p className="text-xs sm:text-sm font-medium text-center">
           🎁 Buy 1 Get 1 Free : BUY2 🎁
         </p>
