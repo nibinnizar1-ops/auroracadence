@@ -6,6 +6,7 @@ import { Banner } from "@/components/Banner";
 import { CategorySection } from "@/components/CategorySection";
 import { GiftGuide } from "@/components/GiftGuide";
 import { ReviewSection } from "@/components/ReviewSection";
+import { FilteredProductGrid } from "@/components/FilteredProductGrid";
 
 const Index = () => {
   return (
@@ -32,29 +33,12 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="top-styles" className="py-20 bg-secondary/30">
+      <section id="top-styles" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-serif text-foreground text-center mb-12">
-            Aurora's Top Styles
+          <h2 className="text-3xl md:text-4xl font-serif text-foreground text-center mb-12 uppercase tracking-wide">
+            Aurora's TOP STYLES
           </h2>
-          <div className="flex justify-center gap-4 mb-12 flex-wrap">
-            <button className="px-6 py-2 border border-foreground text-foreground hover:bg-foreground hover:text-background transition-all rounded-full">
-              All
-            </button>
-            <button className="px-6 py-2 border border-border text-foreground hover:border-foreground hover:bg-foreground hover:text-background transition-all rounded-full">
-              Necklaces
-            </button>
-            <button className="px-6 py-2 border border-border text-foreground hover:border-foreground hover:bg-foreground hover:text-background transition-all rounded-full">
-              Rings
-            </button>
-            <button className="px-6 py-2 border border-border text-foreground hover:border-foreground hover:bg-foreground hover:text-background transition-all rounded-full">
-              Earrings
-            </button>
-            <button className="px-6 py-2 border border-border text-foreground hover:border-foreground hover:bg-foreground hover:text-background transition-all rounded-full">
-              Bracelets
-            </button>
-          </div>
-          <ProductGrid />
+          <FilteredProductGrid />
         </div>
       </section>
 
