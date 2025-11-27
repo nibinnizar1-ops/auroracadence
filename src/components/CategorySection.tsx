@@ -85,6 +85,7 @@ export const CategorySection = () => {
                 <div
                   key={category.name}
                   onClick={() => updateCarousel(index)}
+                  onMouseEnter={() => updateCarousel(index)}
                   className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
@@ -129,22 +130,27 @@ export const CategorySection = () => {
                       filter: cardClass === 'center' ? 'none' : 'grayscale(100%) brightness(0.8)',
                     }}
                   />
+                  
+                  {/* Category Name Overlay on Card */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
+                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-1000 ${
+                      cardClass === 'center' ? 'opacity-100 translate-y-0' : 'opacity-70 translate-y-2'
+                    }`}>
+                      {category.name}
+                    </h3>
+                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-1000 ${
+                      cardClass === 'center' ? 'opacity-100' : 'opacity-50'
+                    }`}>
+                      {category.description}
+                    </p>
+                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-1000 ${
+                      cardClass === 'center' ? 'opacity-100 scale-100' : 'opacity-50 scale-75'
+                    }`} />
+                  </div>
                 </div>
               );
             })}
           </div>
-        </div>
-
-        {/* Category Info */}
-        <div className="text-center mt-10 transition-opacity duration-500">
-          <h2 className="text-4xl font-bold text-foreground mb-3 relative inline-block">
-            <span className="relative z-10">{categories[currentIndex].name}</span>
-            <div className="absolute top-1/2 left-[-120px] w-[100px] h-0.5 bg-foreground" />
-            <div className="absolute top-1/2 right-[-120px] w-[100px] h-0.5 bg-foreground" />
-          </h2>
-          <p className="text-xl text-muted-foreground uppercase tracking-widest mt-2">
-            {categories[currentIndex].description}
-          </p>
         </div>
 
         {/* Dots Navigation */}
