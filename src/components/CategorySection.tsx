@@ -53,7 +53,7 @@ export const CategorySection = () => {
         </h1>
 
         {/* 3D Carousel Container */}
-        <div className="relative w-full max-w-[90rem] mx-auto h-[450px] mt-20 px-4" style={{ perspective: '1000px' }}>
+        <div className="relative w-full max-w-[120rem] mx-auto h-[450px] mt-20 px-4" style={{ perspective: '1200px' }}>
           {/* Navigation Arrows */}
           <Button
             variant="ghost"
