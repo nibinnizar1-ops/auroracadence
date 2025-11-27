@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
@@ -16,6 +16,7 @@ const categories = [
 export const CategorySection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const updateCarousel = (newIndex: number) => {
     setCurrentIndex((newIndex + categories.length) % categories.length);
@@ -23,6 +24,17 @@ export const CategorySection = () => {
 
   const nextSlide = () => updateCarousel(currentIndex + 1);
   const prevSlide = () => updateCarousel(currentIndex - 1);
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, isPaused]);
 
   const getCardClass = (index: number) => {
     const offset = (index - currentIndex + categories.length) % categories.length;
@@ -36,7 +48,12 @@ export const CategorySection = () => {
   };
 
   return (
-    <section id="luxury-moods" className="relative py-20 bg-background overflow-hidden">
+    <section 
+      id="luxury-moods" 
+      className="relative py-20 bg-background overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="container mx-auto px-4">
         {/* Large Background Title */}
         <h1 
