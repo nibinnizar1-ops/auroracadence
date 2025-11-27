@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { CategoryShowcase } from "@/components/CategoryShowcase";
@@ -9,6 +10,10 @@ import { ReviewSection } from "@/components/ReviewSection";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
 
 const Index = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
