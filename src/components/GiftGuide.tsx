@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import realWife from "@/assets/real-wife.jpg";
 import realGirlfriend from "@/assets/real-girlfriend.jpg";
 import realMom from "@/assets/real-mom.jpg";
@@ -6,11 +7,11 @@ import realDaughter from "@/assets/real-daughter.jpg";
 import realFriend from "@/assets/real-friend.jpg";
 
 const giftCategories = [
-  { name: "WIFE", label: "Gifts for", illustration: realWife, color: "from-rose-500 to-pink-600", href: "#wife" },
-  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500", href: "#girlfriend" },
-  { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500", href: "#mom" },
-  { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500", href: "#sister" },
-  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500", href: "#best-friend" },
+  { name: "WIFE", label: "Gifts for", illustration: realWife, color: "from-rose-500 to-pink-600", href: "/collections" },
+  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500", href: "/collections" },
+  { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500", href: "/collections" },
+  { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500", href: "/collections" },
+  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500", href: "/collections" },
 ];
 
 export const GiftGuide = () => {
@@ -27,9 +28,9 @@ export const GiftGuide = () => {
         <div className="relative flex justify-center items-center min-h-[450px] px-4">
           <div className="flex items-stretch justify-center max-w-6xl">
             {giftCategories.map((category, index) => (
-              <a
+              <Link
                 key={category.name}
-                href={category.href}
+                to={category.href}
                 className="gift-card group relative h-[400px] w-[280px] bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-500 ease-out cursor-pointer border border-border/50"
                 style={{
                   marginLeft: index === 0 ? '0' : '-80px',
@@ -57,7 +58,7 @@ export const GiftGuide = () => {
                     </h3>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>

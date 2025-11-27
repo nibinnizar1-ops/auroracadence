@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
@@ -6,11 +7,11 @@ import heroJewelry2 from "@/assets/hero-jewelry-2.jpg";
 import heroJewelry3 from "@/assets/hero-jewelry-3.jpg";
 
 const categories = [
-  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1, href: "#office-wear" },
-  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2, href: "#daily-wear" },
-  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3, href: "#party-wear" },
-  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1, href: "#date-night" },
-  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2, href: "#wedding-wear" },
+  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1, href: "/office-wear" },
+  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2, href: "/daily-wear" },
+  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3, href: "/party-wear" },
+  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1, href: "/date-night" },
+  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2, href: "/wedding-wear" },
 ];
 
 export const CategorySection = () => {
@@ -79,9 +80,9 @@ export const CategorySection = () => {
               const cardClass = getCardClass(index);
               
               return (
-                <a
+                <Link
                   key={category.name}
-                  href={cardClass === 'center' ? category.href : undefined}
+                  to={cardClass === 'center' ? category.href : '#'}
                   onClick={(e) => {
                     if (cardClass !== 'center') {
                       e.preventDefault();
@@ -155,7 +156,7 @@ export const CategorySection = () => {
                       )}
                     </div>
                   </div>
-                </a>
+                </Link>
               );
             })}
           </div>

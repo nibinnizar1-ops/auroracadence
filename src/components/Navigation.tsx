@@ -11,15 +11,15 @@ export const Navigation = () => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = [
-    { label: "New Arrivals", href: "#new-arrivals" },
-    { label: "Office Wear", href: "#office-wear" },
-    { label: "Daily Wear", href: "#daily-wear" },
-    { label: "Party Wear", href: "#party-wear" },
-    { label: "Date Night", href: "#date-night" },
-    { label: "Wedding Wear", href: "#wedding-wear" },
-    { label: "Collections", href: "#collections" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
+    { label: "New Arrivals", href: "/new-arrivals" },
+    { label: "Office Wear", href: "/office-wear" },
+    { label: "Daily Wear", href: "/daily-wear" },
+    { label: "Party Wear", href: "/party-wear" },
+    { label: "Date Night", href: "/date-night" },
+    { label: "Wedding Wear", href: "/wedding-wear" },
+    { label: "Collections", href: "/collections" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
@@ -68,13 +68,13 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-8 py-4 overflow-x-auto">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.label}
-              href={item.href}
+              to={item.href}
               className="text-sm text-foreground hover:text-foreground/60 transition-colors whitespace-nowrap"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
