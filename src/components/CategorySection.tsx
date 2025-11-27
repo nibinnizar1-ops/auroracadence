@@ -6,11 +6,11 @@ import heroJewelry2 from "@/assets/hero-jewelry-2.jpg";
 import heroJewelry3 from "@/assets/hero-jewelry-3.jpg";
 
 const categories = [
-  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1 },
-  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2 },
-  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3 },
-  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1 },
-  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2 },
+  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1, href: "#office-wear" },
+  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2, href: "#daily-wear" },
+  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3, href: "#party-wear" },
+  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1, href: "#date-night" },
+  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2, href: "#wedding-wear" },
 ];
 
 export const CategorySection = () => {
@@ -79,9 +79,15 @@ export const CategorySection = () => {
               const cardClass = getCardClass(index);
               
               return (
-                <div
+                <a
                   key={category.name}
-                  onClick={() => updateCarousel(index)}
+                  href={cardClass === 'center' ? category.href : undefined}
+                  onClick={(e) => {
+                    if (cardClass !== 'center') {
+                      e.preventDefault();
+                      updateCarousel(index);
+                    }
+                  }}
                   onMouseEnter={() => updateCarousel(index)}
                   className={`absolute h-[450px] bg-card rounded-2xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
@@ -149,7 +155,7 @@ export const CategorySection = () => {
                       )}
                     </div>
                   </div>
-                </div>
+                </a>
               );
             })}
           </div>

@@ -1,4 +1,3 @@
-import { Heart } from "lucide-react";
 import realWife from "@/assets/real-wife.jpg";
 import realGirlfriend from "@/assets/real-girlfriend.jpg";
 import realMom from "@/assets/real-mom.jpg";
@@ -7,11 +6,11 @@ import realDaughter from "@/assets/real-daughter.jpg";
 import realFriend from "@/assets/real-friend.jpg";
 
 const giftCategories = [
-  { name: "WIFE", label: "Gifts for", illustration: realWife, color: "from-rose-500 to-pink-600" },
-  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500" },
-  { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500" },
-  { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500" },
-  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500" },
+  { name: "WIFE", label: "Gifts for", illustration: realWife, color: "from-rose-500 to-pink-600", href: "#wife" },
+  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500", href: "#girlfriend" },
+  { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500", href: "#mom" },
+  { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500", href: "#sister" },
+  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500", href: "#best-friend" },
 ];
 
 export const GiftGuide = () => {
@@ -20,20 +19,17 @@ export const GiftGuide = () => {
     <section className="py-20 bg-gradient-to-b from-background via-secondary/20 to-background overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <Heart className="w-12 h-12 text-accent mx-auto mb-4 animate-pulse" />
           <h2 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
             Timeless Gifts For Every Relationship
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Find the perfect piece that speaks to your heart and celebrates your special bond
-          </p>
         </div>
 
         <div className="relative flex justify-center items-center min-h-[450px] px-4">
           <div className="flex items-stretch justify-center max-w-6xl">
             {giftCategories.map((category, index) => (
-              <div
+              <a
                 key={category.name}
+                href={category.href}
                 className="gift-card group relative h-[400px] w-[280px] bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-500 ease-out cursor-pointer border border-border/50"
                 style={{
                   marginLeft: index === 0 ? '0' : '-80px',
@@ -61,7 +57,7 @@ export const GiftGuide = () => {
                     </h3>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
