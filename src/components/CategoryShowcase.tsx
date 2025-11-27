@@ -48,7 +48,7 @@ export const CategoryShowcase = () => {
               to={category.href}
               className="group relative overflow-hidden bg-secondary/10 border border-border hover:border-foreground transition-all"
             >
-              <div className="aspect-[4/5] overflow-hidden">
+              <div className="aspect-square overflow-hidden">
                 <img
                   src={category.image}
                   alt={category.name}
