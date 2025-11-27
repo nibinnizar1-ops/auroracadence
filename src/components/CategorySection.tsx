@@ -84,23 +84,17 @@ export const CategorySection = () => {
                 <div
                   key={category.name}
                   onClick={() => updateCarousel(index)}
-                  onMouseEnter={() => {
-                    setHoveredIndex(index);
-                    updateCarousel(index);
-                  }}
+                  onMouseEnter={() => updateCarousel(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   className={`absolute w-[280px] h-[380px] md:w-[320px] md:h-[420px] bg-card rounded-3xl overflow-hidden cursor-pointer ${
                     cardClass === 'hidden' ? 'opacity-0 pointer-events-none' : ''
                   }`}
                   style={{
                     transformStyle: 'preserve-3d',
-                    transition: 'all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     boxShadow: cardClass === 'center' 
-                      ? '0 25px 50px rgba(0, 0, 0, 0.25)' 
-                      : isHovered 
-                        ? '0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px hsl(var(--gold) / 0.4)' 
-                        : '0 20px 40px rgba(0, 0, 0, 0.15)',
-                    filter: isHovered && cardClass !== 'center' ? 'brightness(1.1)' : 'none',
+                      ? '0 30px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(212, 175, 55, 0.2)' 
+                      : '0 20px 40px rgba(0, 0, 0, 0.15)',
                     ...(cardClass === 'center' && {
                       zIndex: 10,
                       transform: 'scale(1.15) translateZ(0) rotateY(0deg)',
@@ -132,42 +126,33 @@ export const CategorySection = () => {
                     alt={category.name}
                     className="w-full h-full object-cover"
                     style={{
-                      transition: 'filter 0.5s ease-out, transform 0.5s ease-out',
+                      transition: 'filter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
                       filter: cardClass === 'center' 
                         ? 'none' 
-                        : isHovered 
-                          ? 'grayscale(50%) brightness(0.95)' 
-                          : 'grayscale(100%) brightness(0.8)',
-                      transform: isHovered && cardClass !== 'center' ? 'scale(1.05)' : 'scale(1)',
+                        : 'grayscale(100%) brightness(0.8)',
                     }}
                   />
                   
                   {/* Category Name Overlay on Card */}
                   <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none">
-                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-500 ${
+                    <h3 className={`text-2xl font-serif text-white uppercase tracking-widest transition-all duration-600 ${
                       cardClass === 'center' 
-                        ? 'opacity-100 translate-y-0' 
-                        : isHovered 
-                          ? 'opacity-90 translate-y-0' 
-                          : 'opacity-70 translate-y-2'
+                        ? 'opacity-100 translate-y-0 scale-100' 
+                        : 'opacity-60 translate-y-2 scale-95'
                     }`}>
                       {category.name}
                     </h3>
-                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-500 ${
+                    <p className={`text-sm text-white/90 uppercase tracking-wider mt-2 transition-all duration-600 ${
                       cardClass === 'center' 
-                        ? 'opacity-100' 
-                        : isHovered 
-                          ? 'opacity-80' 
-                          : 'opacity-50'
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-40 translate-y-1'
                     }`}>
                       {category.description}
                     </p>
-                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-500 ${
+                    <div className={`w-16 h-0.5 bg-white mt-3 transition-all duration-600 ${
                       cardClass === 'center' 
                         ? 'opacity-100 scale-100' 
-                        : isHovered 
-                          ? 'opacity-80 scale-90' 
-                          : 'opacity-50 scale-75'
+                        : 'opacity-40 scale-75'
                     }`} />
                   </div>
                 </div>
