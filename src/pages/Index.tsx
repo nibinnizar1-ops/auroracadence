@@ -23,6 +23,8 @@ const Index = () => {
 
       <CategoryShowcase />
 
+      <Banner />
+
       <section id="top-styles" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-serif text-foreground text-center mb-12 uppercase tracking-wide">
@@ -35,8 +37,6 @@ const Index = () => {
       <CategorySection />
 
       <BannerLuxury />
-
-      <Banner />
 
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
