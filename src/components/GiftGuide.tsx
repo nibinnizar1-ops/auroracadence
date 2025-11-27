@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import realWife from "@/assets/real-wife.jpg";
 import realGirlfriend from "@/assets/real-girlfriend.jpg";
@@ -25,6 +25,14 @@ const giftCategories = [
 export const GiftGuide = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const totalCards = giftCategories.length;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % totalCards);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [totalCards]);
 
   const getCardClass = (index: number) => {
     const diff = (index - currentIndex + totalCards) % totalCards;
@@ -96,25 +104,6 @@ export const GiftGuide = () => {
                         </h3>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Decorative jewelry piece overlay - bottom right */}
-                  <div className="absolute -bottom-8 -right-8 w-48 h-48 pointer-events-none">
-                    <img 
-                      src={category.jewelry} 
-                      alt="Jewelry"
-                      className="w-full h-full object-contain drop-shadow-2xl"
-                      style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.3))' }}
-                    />
-                  </div>
-                  
-                  {/* Small jewelry accent - top left */}
-                  <div className="absolute -top-4 -left-4 w-20 h-20 pointer-events-none opacity-90">
-                    <img 
-                      src={category.jewelry} 
-                      alt="Jewelry accent"
-                      className="w-full h-full object-contain drop-shadow-xl scale-75"
-                    />
                   </div>
                 </div>
               </div>
