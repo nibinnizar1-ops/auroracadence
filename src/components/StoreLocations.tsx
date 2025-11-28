@@ -1,4 +1,5 @@
 import { MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
 import bannerCollection from "@/assets/banner-collection.jpg";
 import bannerLuxury from "@/assets/banner-luxury.jpg";
 import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
@@ -32,6 +33,26 @@ const stores = [
 ];
 
 export const StoreLocations = () => {
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
+
   return (
     <section className="py-20 bg-secondary/10">
       <div className="container mx-auto px-4">
@@ -43,7 +64,7 @@ export const StoreLocations = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {stores.map((store, index) => (
-            <div key={index} className="store-card-container h-80">
+            <div key={index} className={`store-card-container h-80 ${isScrolling ? 'disable-flip' : ''}`}>
               <div className="store-card">
                 {/* Front of card */}
                 <div className="store-card-front">
@@ -102,6 +123,10 @@ export const StoreLocations = () => {
 
         .store-card-container:hover .store-card {
           transform: rotateY(180deg);
+        }
+
+        .store-card-container.disable-flip .store-card {
+          transform: none !important;
         }
 
         .store-card-front,
