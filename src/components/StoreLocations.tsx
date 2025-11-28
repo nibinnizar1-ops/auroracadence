@@ -54,24 +54,24 @@ export const StoreLocations = () => {
                   } as React.CSSProperties
                 }
               >
-                <div className="store-card-carousel bg-card/95 backdrop-blur-sm border border-border/50 rounded-xl overflow-hidden">
-                  <div className="relative h-40 overflow-hidden">
+                <div className="store-card-carousel bg-card/95 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
                     <img
                       src={store.image}
                       alt={store.name}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-base font-bold text-foreground mb-3 leading-tight tracking-tight uppercase">
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
                       {store.name}
                     </h3>
                     <div className="flex items-start gap-2 mb-3">
-                      <MapPin className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-foreground/90 font-medium tracking-wide uppercase">{store.location}</p>
+                      <MapPin className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                      <p className="text-sm text-foreground font-medium">{store.location}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-2 font-light">
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
                       {store.description}
                     </p>
                   </div>
