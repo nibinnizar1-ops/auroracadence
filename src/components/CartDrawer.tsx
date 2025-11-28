@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,29 +14,20 @@ import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide
 import { useCartStore } from "@/stores/cartStore";
 
 export const CartDrawer = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { 
     items, 
-    isLoading, 
     updateQuantity, 
-    removeItem, 
-    createCheckout 
+    removeItem
   } = useCartStore();
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
 
-  const handleCheckout = async () => {
-    try {
-      await createCheckout();
-      const checkoutUrl = useCartStore.getState().checkoutUrl;
-      if (checkoutUrl) {
-        window.open(checkoutUrl, '_blank');
-        setIsOpen(false);
-      }
-    } catch (error) {
-      console.error('Checkout failed:', error);
-    }
+  const handleCheckout = () => {
+    setIsOpen(false);
+    navigate('/checkout');
   };
 
   return (
@@ -140,19 +132,10 @@ export const CartDrawer = () => {
                   onClick={handleCheckout}
                   className="w-full bg-foreground text-background hover:bg-foreground/90" 
                   size="lg"
-                  disabled={items.length === 0 || isLoading}
+                  disabled={items.length === 0}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Checkout...
-                    </>
-                  ) : (
-                    <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Checkout with Shopify
-                    </>
-                  )}
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Proceed to Checkout
                 </Button>
               </div>
             </>
