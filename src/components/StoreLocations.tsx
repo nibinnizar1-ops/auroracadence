@@ -67,15 +67,20 @@ export const StoreLocations = () => {
 
                 {/* Back of card */}
                 <div className="store-card-back">
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-card">
-                    <h3 className="text-2xl font-bold text-foreground mb-4">
-                      {store.name}
-                    </h3>
+                  <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-background border border-border">
+                    <div className="space-y-2 mb-6">
+                      <p className="text-muted-foreground text-sm font-light tracking-[0.2em] uppercase">
+                        Aurora Cadence X
+                      </p>
+                      <h3 className="text-2xl font-bold text-foreground">
+                        {store.name}
+                      </h3>
+                    </div>
                     <div className="flex items-center justify-center gap-2 mb-6">
                       <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
-                      <p className="text-foreground font-medium">{store.location}</p>
+                      <p className="text-foreground font-semibold">{store.location}</p>
                     </div>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed max-w-sm">
                       {store.description}
                     </p>
                   </div>
