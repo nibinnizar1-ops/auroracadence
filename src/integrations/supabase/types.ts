@@ -14,13 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          billing_address: Json
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string | null
+          order_number: string
+          payment_method: string
+          payment_status: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_signature: string | null
+          shipping: number
+          shipping_address: Json
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          billing_address: Json
+          created_at?: string
+          currency?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items: Json
+          notes?: string | null
+          order_number: string
+          payment_method?: string
+          payment_status?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          shipping?: number
+          shipping_address: Json
+          status?: string
+          subtotal: number
+          tax?: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          billing_address?: Json
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: string
+          payment_method?: string
+          payment_status?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
+          shipping?: number
+          shipping_address?: Json
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_order_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
