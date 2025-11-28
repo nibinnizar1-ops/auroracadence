@@ -14,7 +14,7 @@ const Profile = () => {
   const wishlistItems = useWishlistStore(state => state.items);
 
   if (!isAuthenticated) {
-    navigate("/login");
+    navigate("/");
     return null;
   }
 
@@ -45,8 +45,8 @@ const Profile = () => {
                 <p className="font-medium">{user?.name}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{user?.email}</p>
+                <p className="text-sm text-muted-foreground">Mobile Number</p>
+                <p className="font-medium">{user?.phone}</p>
               </div>
               <Button onClick={handleLogout} variant="outline" className="w-full">
                 <LogOut className="h-4 w-4 mr-2" />
