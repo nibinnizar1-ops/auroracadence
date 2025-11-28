@@ -12,6 +12,7 @@ import { ReviewSection } from "@/components/ReviewSection";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
 import { StoreLocations } from "@/components/StoreLocations";
 import { InfluencerShowcase } from "@/components/InfluencerShowcase";
+import { Timeline } from "@/components/Timeline";
 
 const Index = () => {
   useEffect(() => {
@@ -45,6 +46,8 @@ const Index = () => {
       <GiftGuide />
 
       <StoreLocations />
+
+      <Timeline />
 
       <InfluencerShowcase />
 
