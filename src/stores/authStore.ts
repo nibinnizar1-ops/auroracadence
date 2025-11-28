@@ -3,15 +3,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface User {
   id: string;
-  email: string;
+  phone: string;
   name: string;
 }
 
 interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string, name?: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  login: (phone: string, password: string) => Promise<boolean>;
+  signup: (phone: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -21,16 +21,16 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       isAuthenticated: false,
 
-      login: async (email: string, password: string) => {
+      login: async (phone: string, password: string) => {
         // Mock login - in production, this would call an API
         const storedUsers = localStorage.getItem('demo-users');
         const users = storedUsers ? JSON.parse(storedUsers) : [];
         
-        const user = users.find((u: any) => u.email === email && u.password === password);
+        const user = users.find((u: any) => u.phone === phone && u.password === password);
         
         if (user) {
           set({ 
-            user: { id: user.id, email: user.email, name: user.name },
+            user: { id: user.id, phone: user.phone, name: user.name },
             isAuthenticated: true 
           });
           return true;
@@ -38,19 +38,19 @@ export const useAuthStore = create<AuthStore>()(
         return false;
       },
 
-      signup: async (email: string, password: string, name: string) => {
+      signup: async (phone: string, password: string, name: string) => {
         // Mock signup - in production, this would call an API
         const storedUsers = localStorage.getItem('demo-users');
         const users = storedUsers ? JSON.parse(storedUsers) : [];
         
         // Check if user exists
-        if (users.find((u: any) => u.email === email)) {
+        if (users.find((u: any) => u.phone === phone)) {
           return false;
         }
         
         const newUser = {
           id: crypto.randomUUID(),
-          email,
+          phone,
           password,
           name,
         };
@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.setItem('demo-users', JSON.stringify(users));
         
         set({ 
-          user: { id: newUser.id, email: newUser.email, name: newUser.name },
+          user: { id: newUser.id, phone: newUser.phone, name: newUser.name },
           isAuthenticated: true 
         });
         return true;

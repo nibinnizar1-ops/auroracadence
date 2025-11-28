@@ -7,6 +7,8 @@ import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import { useAuthStore } from "@/stores/authStore";
 import { CartDrawer } from "./CartDrawer";
+import { LoginDialog } from "./LoginDialog";
+import { SignupDialog } from "./SignupDialog";
 import { useState } from "react";
 
 export const Navigation = () => {
@@ -15,6 +17,8 @@ export const Navigation = () => {
   const wishlistItems = useWishlistStore(state => state.items);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -67,7 +71,7 @@ export const Navigation = () => {
                 variant="ghost" 
                 size="icon" 
                 className="relative text-foreground hover:bg-secondary"
-                onClick={() => navigate(isAuthenticated ? "/profile" : "/login")}
+                onClick={() => isAuthenticated ? navigate("/profile") : setLoginOpen(true)}
               >
                 <User className="h-5 w-5" />
               </Button>
@@ -106,6 +110,17 @@ export const Navigation = () => {
           ))}
         </div>
       </div>
+
+      <LoginDialog 
+        open={loginOpen} 
+        onOpenChange={setLoginOpen}
+        onSwitchToSignup={() => setSignupOpen(true)}
+      />
+      <SignupDialog 
+        open={signupOpen} 
+        onOpenChange={setSignupOpen}
+        onSwitchToLogin={() => setLoginOpen(true)}
+      />
     </nav>
   );
 };

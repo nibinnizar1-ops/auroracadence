@@ -15,8 +15,6 @@ import WeddingWear from "./pages/WeddingWear";
 import Collections from "./pages/Collections";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 
@@ -40,8 +38,6 @@ const App = () => (
           <Route path="/collections" element={<Collections />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/wishlist" element={<Wishlist />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
