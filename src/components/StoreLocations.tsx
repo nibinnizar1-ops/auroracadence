@@ -33,24 +33,31 @@ export const StoreLocations = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="flex flex-col gap-14 max-w-xl mx-auto">
           {stores.map((store, index) => (
             <div
               key={index}
-              className="bg-card border border-border rounded-lg p-8 hover:shadow-lg transition-shadow"
+              className="sticky top-8"
+              style={{
+                animation: `rotate-scroll-${index + 1} linear`,
+                animationTimeline: 'scroll()',
+              }}
             >
-              <h3 className="text-xl font-semibold text-foreground mb-3">
-                {store.name}
-              </h3>
-              <div className="flex items-start gap-2 mb-4">
-                <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
-                <p className="text-foreground font-medium">{store.location}</p>
+              <div className="bg-card border border-border rounded-lg p-8 shadow-[0_0_1.25rem_rgba(0,0,0,0.15)] hover:shadow-[0_0_2rem_rgba(0,0,0,0.25)] transition-shadow">
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {store.name}
+                </h3>
+                <div className="flex items-start gap-2 mb-4">
+                  <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                  <p className="text-foreground font-medium">{store.location}</p>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  {store.description}
+                </p>
               </div>
-              <p className="text-muted-foreground leading-relaxed">
-                {store.description}
-              </p>
             </div>
           ))}
+          <div className="h-32" />
         </div>
       </div>
     </section>
