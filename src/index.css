@@ -88,7 +88,7 @@ All colors MUST be HSL.
 
   .carousel-track {
     position: relative;
-    min-width: calc(26rem * var(--total, 12));
+    min-width: calc(20rem * var(--total, 12));
     height: 28rem;
   }
 
@@ -124,13 +124,13 @@ All colors MUST be HSL.
 
   @keyframes scroll-carousel {
     to {
-      left: calc(-26rem * var(--total, 12));
+      left: calc(-20rem * var(--total, 12));
     }
   }
 
   @media (max-width: 768px) {
     .carousel-track {
-      min-width: calc(18rem * var(--total, 12));
+      min-width: calc(14rem * var(--total, 12));
       height: 24rem;
     }
 
