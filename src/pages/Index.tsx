@@ -8,7 +8,6 @@ import { Banner } from "@/components/Banner";
 import { BannerLuxury } from "@/components/BannerLuxury";
 import { CategorySection } from "@/components/CategorySection";
 import { GiftGuide } from "@/components/GiftGuide";
-import { ReviewSection } from "@/components/ReviewSection";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
 import { StoreLocations } from "@/components/StoreLocations";
 import { InfluencerShowcase } from "@/components/InfluencerShowcase";
@@ -61,8 +60,6 @@ const Index = () => {
           <ProductGrid />
         </div>
       </section>
-
-      <ReviewSection />
 
       <footer className="py-12 border-t border-border bg-secondary/20">
         <div className="container mx-auto px-4 text-center">
