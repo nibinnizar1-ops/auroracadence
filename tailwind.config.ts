@@ -78,6 +78,38 @@ export default {
             height: "0",
           },
         },
+        "rotate-scroll-1": {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(5.27deg)",
+          },
+        },
+        "rotate-scroll-2": {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(-5.67deg)",
+          },
+        },
+        "rotate-scroll-3": {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(4.2deg)",
+          },
+        },
+        "rotate-scroll-4": {
+          from: {
+            transform: "rotate(0deg)",
+          },
+          to: {
+            transform: "rotate(-3.8deg)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
