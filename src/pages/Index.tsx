@@ -10,6 +10,8 @@ import { CategorySection } from "@/components/CategorySection";
 import { GiftGuide } from "@/components/GiftGuide";
 import { ReviewSection } from "@/components/ReviewSection";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
+import { StoreLocations } from "@/components/StoreLocations";
+import { InfluencerShowcase } from "@/components/InfluencerShowcase";
 
 const Index = () => {
   useEffect(() => {
@@ -41,6 +43,10 @@ const Index = () => {
       <BannerLuxury />
 
       <GiftGuide />
+
+      <StoreLocations />
+
+      <InfluencerShowcase />
 
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
