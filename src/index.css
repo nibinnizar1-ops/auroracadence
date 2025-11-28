@@ -79,26 +79,4 @@ All colors MUST be HSL.
   h2 {
     letter-spacing: 0.028em;
   }
-
-  /* Infinite carousel animation */
-  @keyframes scroll-left-infinite {
-    to {
-      left: -300rem;
-    }
-  }
-
-  /* Glass morphism effect */
-  .glass-card {
-    background: linear-gradient(145deg, rgba(43, 74, 66, 0.1) 0%, rgba(43, 74, 66, 0.05) 100%);
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--gold) / 0.3);
-    transition: var(--transition-smooth);
-  }
-
-  .glass-card:hover {
-    background: linear-gradient(145deg, rgba(43, 74, 66, 0.2) 0%, rgba(43, 74, 66, 0.1) 100%);
-    border-color: hsl(var(--gold) / 0.6);
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-gold);
-  }
 }

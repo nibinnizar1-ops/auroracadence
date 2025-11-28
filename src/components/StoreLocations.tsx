@@ -1,4 +1,4 @@
-import { MapPin, Sparkles } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 const stores = [
   {
@@ -25,67 +25,32 @@ const stores = [
 
 export const StoreLocations = () => {
   return (
-    <section className="relative py-24 bg-background overflow-hidden">
-      {/* Decorative background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/5 via-secondary/10 to-secondary/5 pointer-events-none" />
-      
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="py-20 bg-secondary/10">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-            <span className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
-              Visit Our Stores
-            </span>
-            <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-          </div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Try. Love. Take Home.
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent to-transparent mx-auto" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {stores.map((store, index) => (
             <div
               key={index}
-              className="glass-card rounded-2xl p-8 group relative overflow-hidden"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="bg-card border border-border rounded-lg p-8 hover:shadow-lg transition-shadow"
             >
-              {/* Shine effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
-              
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground group-hover:text-accent transition-colors">
-                    {store.name}
-                  </h3>
-                  <div className="p-2 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                    <MapPin className="w-5 h-5 text-accent" />
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2 mb-4 text-foreground/80 font-medium">
-                  <span className="inline-block w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <p>{store.location}</p>
-                </div>
-                
-                <p className="text-muted-foreground leading-relaxed group-hover:text-foreground/70 transition-colors">
-                  {store.description}
-                </p>
+              <h3 className="text-xl font-semibold text-foreground mb-3">
+                {store.name}
+              </h3>
+              <div className="flex items-start gap-2 mb-4">
+                <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                <p className="text-foreground font-medium">{store.location}</p>
               </div>
-
-              {/* Decorative corner accent */}
-              <div className="absolute -bottom-2 -right-2 w-24 h-24 bg-accent/5 rounded-tl-full group-hover:scale-110 transition-transform duration-500" />
+              <p className="text-muted-foreground leading-relaxed">
+                {store.description}
+              </p>
             </div>
           ))}
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="text-center mt-16">
-          <div className="inline-flex flex-col items-center gap-2 text-muted-foreground animate-bounce">
-            <span className="text-sm tracking-wider">Explore More</span>
-            <span className="text-2xl">↓</span>
-          </div>
         </div>
       </div>
     </section>
