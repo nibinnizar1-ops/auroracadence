@@ -66,8 +66,8 @@ export const StoreLocations = () => {
                 </div>
 
                 {/* Back of card */}
-                <div className="store-card-back bg-background">
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                <div className="store-card-back">
+                  <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-card">
                     <h3 className="text-2xl font-bold text-foreground mb-4">
                       {store.name}
                     </h3>
@@ -75,7 +75,7 @@ export const StoreLocations = () => {
                       <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
                       <p className="text-foreground font-medium">{store.location}</p>
                     </div>
-                    <p className="text-muted-foreground leading-relaxed max-w-sm">
+                    <p className="text-muted-foreground leading-relaxed">
                       {store.description}
                     </p>
                   </div>
