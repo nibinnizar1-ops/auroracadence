@@ -27,18 +27,8 @@ const stores = [
   },
 ];
 
-// Duplicate stores for seamless loop
-const carouselImages = [
-  ...stores.map(s => s.image),
-  "https://plus.unsplash.com/premium_photo-1671105035554-7f8c2a587201?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1686750875748-d00684d36b1e?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1686844462591-393ceae12be0?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1686839181367-febb561faa53?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1671199850329-91cae34a6b6d?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1685655611311-9f801b43b9fa?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1675598468920-878ae1e46f14?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1718036094878-ecdce2b1be95?q=80&w=715&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-];
+// Duplicate stores for seamless loop (3 times for smooth infinite scroll)
+const carouselStores = [...stores, ...stores, ...stores];
 
 export const StoreLocations = () => {
   return (
@@ -51,50 +41,44 @@ export const StoreLocations = () => {
           </h2>
         </div>
 
-        <div className="carousel-container flex items-center justify-center h-[30rem] overflow-visible">
+        <div className="carousel-container flex items-center justify-center h-[28rem] overflow-visible">
           <div className="carousel-track">
-            {carouselImages.map((image, index) => (
+            {carouselStores.map((store, index) => (
               <div
                 key={index}
                 className="carousel-item"
                 style={
                   {
                     '--i': index + 1,
-                    '--total': carouselImages.length,
+                    '--total': carouselStores.length,
                   } as React.CSSProperties
                 }
               >
-                <img
-                  src={image}
-                  alt={`Aurora Cadence jewelry ${index + 1}`}
-                  className="carousel-image"
-                />
+                <div className="store-card-carousel bg-card/95 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={store.image}
+                      alt={store.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+                      {store.name}
+                    </h3>
+                    <div className="flex items-start gap-2 mb-3">
+                      <MapPin className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                      <p className="text-sm text-foreground font-medium">{store.location}</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                      {store.description}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Store Cards */}
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {stores.map((store, index) => (
-            <div
-              key={index}
-              className="group bg-card border border-border rounded-lg p-8 hover:border-accent/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(var(--gold),0.2)]"
-            >
-              <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-accent transition-colors">
-                {store.name}
-              </h3>
-              <div className="flex items-start gap-2 mb-4">
-                <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
-                <p className="text-foreground font-medium">{store.location}</p>
-              </div>
-              <p className="text-muted-foreground leading-relaxed">
-                {store.description}
-              </p>
-            </div>
-          ))}
         </div>
       </div>
     </section>
