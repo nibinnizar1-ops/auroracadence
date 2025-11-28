@@ -32,21 +32,21 @@ const carouselStores = [...stores, ...stores, ...stores];
 
 export const StoreLocations = () => {
   return (
-    <section className="relative py-20 bg-gradient-to-b from-background via-secondary/20 to-background overflow-hidden">
+    <section className="relative py-20 bg-background overflow-hidden">
       {/* Infinite Carousel */}
       <div className="mb-20">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Try. Love. Take Home.
           </h2>
         </div>
 
-        <div className="store-carousel-container">
-          <div className="store-carousel-track">
+        <div className="carousel-container flex items-center justify-center h-[28rem] overflow-visible">
+          <div className="carousel-track">
             {carouselStores.map((store, index) => (
               <div
                 key={index}
-                className="store-carousel-item"
+                className="carousel-item"
                 style={
                   {
                     '--i': index + 1,
@@ -54,33 +54,26 @@ export const StoreLocations = () => {
                   } as React.CSSProperties
                 }
               >
-                <div className="store-location-card">
-                  {/* Image Background */}
-                  <div className="absolute inset-0 overflow-hidden">
-                    <img 
-                      src={store.image} 
+                <div className="store-card-carousel bg-card/95 backdrop-blur-sm border border-border rounded-lg overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={store.image}
                       alt={store.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent"></div>
                   </div>
-
-                  {/* Content */}
-                  <div className="relative h-full flex flex-col items-center justify-center text-center p-6 z-10">
-                    <div className="space-y-3">
-                      <h3 className="text-white text-xl font-bold tracking-wide leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] mb-3">
-                        {store.name}
-                      </h3>
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <MapPin className="w-4 h-4 text-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]" />
-                        <p className="text-white text-sm font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                          {store.location}
-                        </p>
-                      </div>
-                      <p className="text-white/90 text-sm leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] max-w-[280px] mx-auto">
-                        {store.description}
-                      </p>
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+                      {store.name}
+                    </h3>
+                    <div className="flex items-start gap-2 mb-3">
+                      <MapPin className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
+                      <p className="text-sm text-foreground font-medium">{store.location}</p>
                     </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                      {store.description}
+                    </p>
                   </div>
                 </div>
               </div>
