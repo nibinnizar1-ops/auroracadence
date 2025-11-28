@@ -114,10 +114,6 @@ export const StoreLocations = () => {
           overflow: hidden;
         }
 
-        .store-card-front {
-          position: relative;
-        }
-
         .store-card-back {
           transform: rotateY(180deg);
           border: 1px solid hsl(var(--border));
