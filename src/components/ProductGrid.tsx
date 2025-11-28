@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import { getProducts, ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
+import { useWishlistStore } from "@/stores/wishlistStore";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export const ProductGrid = () => {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore(state => state.addItem);
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -26,6 +30,27 @@ export const ProductGrid = () => {
 
     fetchProducts();
   }, []);
+
+  const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+  const filteredProducts = searchQuery 
+    ? products.filter(product => 
+        product.node.title.toLowerCase().includes(searchQuery) ||
+        product.node.description.toLowerCase().includes(searchQuery)
+      )
+    : products;
+
+  const handleToggleWishlist = (product: ShopifyProduct, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isInWishlist(product.node.id)) {
+      removeFromWishlist(product.node.id);
+      toast.success("Removed from wishlist");
+    } else {
+      addToWishlist(product);
+      toast.success("Added to wishlist");
+    }
+  };
 
   const handleAddToCart = (product: ShopifyProduct) => {
     const variant = product.node.variants.edges[0]?.node;
@@ -62,29 +87,33 @@ export const ProductGrid = () => {
     );
   }
 
-  if (products.length === 0) {
+  if (products.length === 0 || filteredProducts.length === 0) {
     return (
       <div className="text-center py-20">
-        <h3 className="text-2xl font-semibold text-foreground mb-4">No Products Found</h3>
+        <h3 className="text-2xl font-semibold text-foreground mb-4">
+          {searchQuery ? 'No products match your search' : 'No Products Found'}
+        </h3>
         <p className="text-muted-foreground mb-6">
-          We're currently setting up our collection. Check back soon!
+          {searchQuery ? 'Try a different search term' : "We're currently setting up our collection. Check back soon!"}
         </p>
-        <p className="text-sm text-muted-foreground">
-          Or tell us what jewelry pieces you'd like to see in our store.
-        </p>
+        {!searchQuery && (
+          <p className="text-sm text-muted-foreground">
+            Or tell us what jewelry pieces you'd like to see in our store.
+          </p>
+        )}
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {products.map((product) => {
+      {filteredProducts.map((product) => {
         const variant = product.node.variants.edges[0]?.node;
         const image = product.node.images.edges[0]?.node;
 
         return (
           <Card key={product.node.id} className="group overflow-hidden border-border hover:border-foreground transition-all hover:shadow-lg">
-            <Link to={`/product/${product.node.handle}`}>
+            <Link to={`/product/${product.node.handle}`} className="relative block">
               <div className="aspect-square overflow-hidden bg-secondary">
                 {image && (
                   <img
@@ -94,6 +123,19 @@ export const ProductGrid = () => {
                   />
                 )}
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 bg-background/80 hover:bg-background"
+                onClick={(e) => handleToggleWishlist(product, e)}
+              >
+                <Heart 
+                  className={cn(
+                    "h-5 w-5",
+                    isInWishlist(product.node.id) ? "fill-primary text-primary" : ""
+                  )}
+                />
+              </Button>
             </Link>
             <CardContent className="p-4">
               <Link to={`/product/${product.node.handle}`}>
