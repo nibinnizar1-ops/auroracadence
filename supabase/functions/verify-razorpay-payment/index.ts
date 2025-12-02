@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHmac } from "https://deno.land/std@0.177.0/node/crypto.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,21 +12,39 @@ serve(async (req) => {
   }
 
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId } = await req.json();
+    const { payment_token_id, payment_id, status, dbOrderId } = await req.json();
     
-    const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
+    const zwitchSecretKey = Deno.env.get('ZWITCH_SECRET_KEY');
     
-    if (!razorpayKeySecret) {
-      throw new Error('Razorpay secret not configured');
+    if (!zwitchSecretKey) {
+      throw new Error('Zwitch credentials not configured');
     }
 
-    // Verify signature
-    const generatedSignature = createHmac('sha256', razorpayKeySecret)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
+    console.log('Verifying Zwitch payment:', { payment_token_id, payment_id, status });
 
-    if (generatedSignature !== razorpay_signature) {
-      throw new Error('Invalid payment signature');
+    // Verify payment status from Zwitch API
+    const statusResponse = await fetch(
+      `https://api.zwitch.io/v1/payment_token/${payment_token_id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + zwitchSecretKey,
+        },
+      }
+    );
+
+    if (!statusResponse.ok) {
+      const error = await statusResponse.text();
+      console.error('Zwitch status check failed:', error);
+      throw new Error('Failed to verify payment status');
+    }
+
+    const paymentData = await statusResponse.json();
+    console.log('Zwitch payment data:', paymentData);
+    
+    if (paymentData.status !== 'captured') {
+      throw new Error('Payment not captured');
     }
 
     // Update order in database
@@ -38,8 +55,7 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('orders')
       .update({
-        razorpay_payment_id,
-        razorpay_signature,
+        razorpay_payment_id: payment_id,
         payment_status: 'completed',
         status: 'confirmed',
       })
@@ -49,6 +65,8 @@ serve(async (req) => {
       console.error('Database update error:', updateError);
       throw new Error('Failed to update order status');
     }
+
+    console.log('Payment verified successfully for order:', dbOrderId);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Payment verified successfully' }),
