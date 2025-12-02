@@ -14,34 +14,45 @@ serve(async (req) => {
   try {
     const { amount, currency, customerInfo, items } = await req.json();
     
-    const razorpayKeyId = Deno.env.get('RAZORPAY_KEY_ID');
-    const razorpayKeySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
+    const zwitchAccessKey = Deno.env.get('ZWITCH_ACCESS_KEY');
+    const zwitchSecretKey = Deno.env.get('ZWITCH_SECRET_KEY');
     
-    if (!razorpayKeyId || !razorpayKeySecret) {
-      throw new Error('Razorpay credentials not configured');
+    if (!zwitchAccessKey || !zwitchSecretKey) {
+      throw new Error('Zwitch credentials not configured');
     }
 
-    // Create Razorpay order
-    const orderResponse = await fetch('https://api.razorpay.com/v1/orders', {
+    const mtx = `MTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create Zwitch payment token
+    const tokenResponse = await fetch('https://api.zwitch.io/v1/payment_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa(`${razorpayKeyId}:${razorpayKeySecret}`),
+        'Authorization': 'Bearer ' + zwitchSecretKey,
       },
       body: JSON.stringify({
-        amount,
-        currency,
-        receipt: `receipt_${Date.now()}`,
+        amount: amount / 100, // Zwitch expects amount in rupees, not paise
+        currency: currency || 'INR',
+        contact_number: customerInfo.phone,
+        email_id: customerInfo.email,
+        mtx: mtx,
+        udf: {
+          customer_name: customerInfo.name,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          state: customerInfo.state,
+          pincode: customerInfo.pincode,
+        }
       }),
     });
 
-    if (!orderResponse.ok) {
-      const error = await orderResponse.text();
-      console.error('Razorpay order creation failed:', error);
-      throw new Error('Failed to create Razorpay order');
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.text();
+      console.error('Zwitch payment token creation failed:', error);
+      throw new Error('Failed to create Zwitch payment token');
     }
 
-    const razorpayOrder = await orderResponse.json();
+    const zwitchPayment = await tokenResponse.json();
     
     // Create order in database
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -51,7 +62,7 @@ serve(async (req) => {
     const { data: dbOrder, error: dbError } = await supabase
       .from('orders')
       .insert({
-        order_number: razorpayOrder.receipt,
+        order_number: mtx,
         customer_name: customerInfo.name,
         customer_email: customerInfo.email,
         customer_phone: customerInfo.phone,
@@ -70,8 +81,9 @@ serve(async (req) => {
         items,
         subtotal: amount / 100,
         total: amount / 100,
-        currency,
-        razorpay_order_id: razorpayOrder.id,
+        currency: currency || 'INR',
+        razorpay_order_id: zwitchPayment.id,
+        payment_method: 'zwitch',
         payment_status: 'pending',
         status: 'pending',
       })
@@ -83,12 +95,15 @@ serve(async (req) => {
       throw new Error('Failed to create order in database');
     }
 
+    console.log('Zwitch payment token created:', zwitchPayment.id);
+
     return new Response(
       JSON.stringify({
-        orderId: razorpayOrder.id,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        keyId: razorpayKeyId,
+        paymentToken: zwitchPayment.id,
+        accessKey: zwitchAccessKey,
+        amount: amount / 100,
+        currency: currency || 'INR',
+        mtx: mtx,
         dbOrderId: dbOrder.id,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

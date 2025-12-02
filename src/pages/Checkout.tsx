@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Layer: any;
   }
 }
 
@@ -43,10 +43,11 @@ export default function Checkout() {
     });
   };
 
-  const loadRazorpayScript = () => {
+  const loadZwitchScript = () => {
     return new Promise((resolve) => {
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://payments.open.money/layer";
+      script.id = "context";
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
@@ -70,13 +71,13 @@ export default function Checkout() {
     setIsLoading(true);
 
     try {
-      // Load Razorpay script
-      const scriptLoaded = await loadRazorpayScript();
+      // Load Zwitch script
+      const scriptLoaded = await loadZwitchScript();
       if (!scriptLoaded) {
-        throw new Error("Failed to load Razorpay SDK");
+        throw new Error("Failed to load Zwitch SDK");
       }
 
-      // Create order in backend
+      // Create payment token in backend
       const { data: orderData, error: orderError } = await supabase.functions.invoke(
         "create-razorpay-order",
         {
@@ -97,53 +98,56 @@ export default function Checkout() {
 
       if (orderError) throw orderError;
 
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Your Jewelry Store",
-        description: "Order Payment",
-        order_id: orderData.orderId,
-        handler: async function (response: any) {
-          try {
-            // Verify payment
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
-              "verify-razorpay-payment",
-              {
-                body: {
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  dbOrderId: orderData.dbOrderId,
-                },
-              }
-            );
+      console.log('Opening Zwitch payment with token:', orderData.paymentToken);
 
-            if (verifyError) throw verifyError;
-
-            toast.success("Payment successful!");
-            clearCart();
-            navigate("/");
-          } catch (error) {
-            console.error("Payment verification failed:", error);
-            toast.error("Payment verification failed");
+      // Open Zwitch Layer payment page
+      window.Layer.checkout(
+        {
+          token: orderData.paymentToken,
+          accesskey: orderData.accessKey,
+          theme: {
+            color: "#3d9080",
+            error_color: "#ff2b2b",
           }
         },
-        prefill: {
-          name: formData.name,
-          email: formData.email,
-          contact: formData.phone,
-        },
-        theme: {
-          color: "hsl(var(--primary))",
-        },
-      };
+        async function(response: any) {
+          console.log('Zwitch payment response:', response);
+          
+          if (response.status === "captured") {
+            try {
+              // Verify payment
+              const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
+                "verify-razorpay-payment",
+                {
+                  body: {
+                    payment_token_id: response.payment_token_id,
+                    payment_id: response.payment_id,
+                    status: response.status,
+                    dbOrderId: orderData.dbOrderId,
+                  },
+                }
+              );
 
-      const razorpay = new window.Razorpay(options);
-      razorpay.on("payment.failed", function (response: any) {
-        toast.error("Payment failed: " + response.error.description);
-      });
-      razorpay.open();
+              if (verifyError) throw verifyError;
+
+              toast.success("Payment successful!");
+              clearCart();
+              navigate("/");
+            } catch (error) {
+              console.error("Payment verification failed:", error);
+              toast.error("Payment verification failed");
+            }
+          } else if (response.status === "failed") {
+            toast.error("Payment failed. Please try again.");
+          } else if (response.status === "cancelled") {
+            toast.error("Payment cancelled.");
+          }
+        },
+        function(err: any) {
+          console.error("Zwitch integration error:", err);
+          toast.error("Payment gateway error: " + (err.message || "Unknown error"));
+        }
+      );
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error("Failed to initiate payment");
