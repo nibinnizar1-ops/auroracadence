@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
+import { Chrome } from "lucide-react";
 
 interface LoginDialogProps {
   open: boolean;
@@ -20,9 +21,11 @@ interface LoginDialogProps {
 
 export const LoginDialog = ({ open, onOpenChange, onSwitchToSignup }: LoginDialogProps) => {
   const login = useAuthStore(state => state.login);
+  const signInWithGoogle = useAuthStore(state => state.signInWithGoogle);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +42,17 @@ export const LoginDialog = ({ open, onOpenChange, onSwitchToSignup }: LoginDialo
       setPassword("");
     } else {
       toast.error("Invalid phone number or password");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await signInWithGoogle();
+      // The redirect will happen automatically, so we don't need to close the dialog here
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in with Google");
+      setIsGoogleLoading(false);
     }
   };
 
@@ -76,6 +90,28 @@ export const LoginDialog = ({ open, onOpenChange, onSwitchToSignup }: LoginDialo
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Login"}
+          </Button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleSignIn}
+            disabled={isGoogleLoading || isLoading}
+          >
+            <Chrome className="mr-2 h-4 w-4" />
+            {isGoogleLoading ? "Signing in..." : "Sign in with Google"}
           </Button>
           
           <p className="text-center text-sm text-muted-foreground">

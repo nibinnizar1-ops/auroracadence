@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, currency, customerInfo, items } = await req.json();
+    const { amount, currency, customerInfo, items, userId } = await req.json();
     
     const zwitchAccessKey = Deno.env.get('ZWITCH_ACCESS_KEY');
     const zwitchSecretKey = Deno.env.get('ZWITCH_SECRET_KEY');
@@ -66,6 +66,7 @@ serve(async (req) => {
         customer_name: customerInfo.name,
         customer_email: customerInfo.email,
         customer_phone: customerInfo.phone,
+        user_id: userId || null, // Link to user if logged in
         shipping_address: {
           address: customerInfo.address,
           city: customerInfo.city,

@@ -47,8 +47,12 @@ export const Navigation = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-8">
             {/* Logo */}
-            <Link to="/" className="text-2xl font-bold text-foreground hover:text-foreground/80 transition-colors whitespace-nowrap">
-              AURORA CADENCE
+            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+              <img 
+                src="/AURORA_CADENCE_Black_Text.png" 
+                alt="AURORA CADENCE" 
+                className="h-[58px] w-auto object-contain"
+              />
             </Link>
             
             {/* Search Bar */}

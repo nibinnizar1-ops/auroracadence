@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useAddressStore } from "@/stores/addressStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,7 +22,11 @@ declare global {
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, clearCart } = useCartStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const { addresses, loadAddresses, getDefaultAddress } = useAddressStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+  const [saveAddress, setSaveAddress] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -30,6 +37,65 @@ export default function Checkout() {
     state: "",
     pincode: "",
   });
+
+  // Load addresses when user is logged in
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      loadAddresses(user.id);
+    }
+  }, [isAuthenticated, user?.id, loadAddresses]);
+
+  // Pre-fill form with user email if logged in
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: user.email || "" }));
+    }
+    if (user?.name && !formData.name) {
+      setFormData(prev => ({ ...prev, name: user.name }));
+    }
+  }, [user]);
+
+  // Load default address when addresses are loaded
+  useEffect(() => {
+    if (addresses.length > 0 && selectedAddressId === "new") {
+      const defaultAddr = getDefaultAddress();
+      if (defaultAddr) {
+        setSelectedAddressId(defaultAddr.id);
+        handleAddressSelect(defaultAddr.id);
+      }
+    }
+  }, [addresses, getDefaultAddress]);
+
+  const handleAddressSelect = (addressId: string) => {
+    setSelectedAddressId(addressId);
+    
+    if (addressId === "new") {
+      // Clear form for new address
+      setFormData({
+        name: user?.name || "",
+        email: user?.email || "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+      });
+    } else {
+      // Load selected address
+      const address = addresses.find(addr => addr.id === addressId);
+      if (address) {
+        setFormData({
+          name: address.full_name,
+          email: user?.email || formData.email,
+          phone: address.phone,
+          address: address.address,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+        });
+      }
+    }
+  };
 
   const totalPrice = items.reduce(
     (sum, item) => sum + parseFloat(item.price.amount) * item.quantity,
@@ -70,6 +136,27 @@ export default function Checkout() {
 
     setIsLoading(true);
 
+    // Save address if user is logged in and requested
+    if (isAuthenticated && user?.id && saveAddress && selectedAddressId === "new") {
+      try {
+        const { addAddress } = useAddressStore.getState();
+        await addAddress(user.id, {
+          label: "Home",
+          full_name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          is_default: addresses.length === 0, // Set as default if first address
+        });
+        toast.success("Address saved!");
+      } catch (error) {
+        console.error("Error saving address:", error);
+        // Continue with payment even if address save fails
+      }
+    }
+
     try {
       // Load Zwitch script
       const scriptLoaded = await loadZwitchScript();
@@ -85,6 +172,7 @@ export default function Checkout() {
             amount: Math.round(totalPrice * 100), // Convert to paise
             currency: items[0]?.price.currencyCode || "INR",
             customerInfo: formData,
+            userId: user?.id || null, // Pass user ID if logged in
             items: items.map(item => ({
               id: item.product.node.id,
               title: item.product.node.title,
@@ -177,6 +265,34 @@ export default function Checkout() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePayment} className="space-y-4">
+              {/* Saved Addresses Selector (if logged in) */}
+              {isAuthenticated && addresses.length > 0 && (
+                <div>
+                  <Label>Select Saved Address</Label>
+                  <Select value={selectedAddressId} onValueChange={handleAddressSelect}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an address" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">+ Add New Address</SelectItem>
+                      {addresses.map((address) => (
+                        <SelectItem key={address.id} value={address.id}>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            <div>
+                              <div className="font-medium">{address.label || "Address"}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {address.address}, {address.city}
+                              </div>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
@@ -254,6 +370,22 @@ export default function Checkout() {
                   onChange={handleInputChange}
                 />
               </div>
+
+              {/* Save Address Checkbox (if logged in and new address) */}
+              {isAuthenticated && selectedAddressId === "new" && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="saveAddress"
+                    checked={saveAddress}
+                    onChange={(e) => setSaveAddress(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="saveAddress" className="font-normal cursor-pointer">
+                    Save this address for future orders
+                  </Label>
+                </div>
+              )}
               
               <Button 
                 type="submit" 
