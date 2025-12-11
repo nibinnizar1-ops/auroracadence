@@ -4,6 +4,66 @@
 
 This guide explains how to set up admin users who can upload product images and manage the store.
 
+## Two Methods Available
+
+### Method 1: Using Profiles Table (if you have access)
+- Uses `profiles` table with `is_admin` field
+- Migration: `20250101000009_add_admin_support.sql`
+
+### Method 2: Standalone Admin Users Table (Recommended if you have restrictions)
+- Uses separate `admin_users` table (no profiles required)
+- Migration: `20250101000010_create_admin_users_table.sql`
+- **Use this if you can't create the profiles table!**
+
+---
+
+## Method 2: Standalone Admin Users (No Profiles Required)
+
+### Step 1: Run the Migration
+
+Run this migration file:
+- `supabase/migrations/20250101000010_create_admin_users_table.sql`
+
+This creates a standalone `admin_users` table that doesn't require the profiles table.
+
+### Step 2: Create Admin User Account
+
+1. Go to **Authentication** → **Users** in Supabase Dashboard
+2. Click **"Add user"** → **"Create new user"**
+3. Fill in:
+   - **Email**: `admin@auroracadence.com` (or your admin email)
+   - **Password**: Create a strong password
+   - **Auto Confirm User**: ✅ Check this box
+4. Click **"Create user"**
+5. **Copy the User ID** (you'll need it in the next step)
+
+### Step 3: Add User to Admin Table
+
+Run this SQL (replace with your user ID and email):
+
+```sql
+INSERT INTO public.admin_users (user_id, email)
+VALUES (
+  'paste-user-id-here',  -- Get from Authentication → Users → Click user → Copy ID
+  'admin@auroracadence.com'  -- Your admin email
+);
+```
+
+**To get User ID:**
+1. Go to **Authentication** → **Users**
+2. Click on the user
+3. Copy the **UUID** shown at the top
+
+### Step 4: Test Admin Access
+
+1. **Sign in** with the admin credentials
+2. **Try uploading** an image to the `product-images` bucket
+3. If successful, admin setup is complete! ✅
+
+---
+
+## Method 1: Using Profiles Table (If Available)
+
 ## How Admin Authentication Works
 
 1. **Admin users are regular Supabase users** - They sign in with email/password or Google
@@ -98,19 +158,21 @@ To add more admins, repeat Step 1 and Step 2 for each user.
 
 **Solution**: Make sure:
 1. User is signed in
-2. User's profile has `is_admin = true`
+2. User is added to `admin_users` table (Method 2) OR `is_admin = true` in profiles (Method 1)
 3. Storage buckets are created
-4. Migration `20250101000009_add_admin_support.sql` is applied
+4. Storage migration is applied
 
-### Can't find user in profiles table
+### Can't find user in admin_users table (Method 2)
+
+**Solution**: 
+- Make sure you've run the INSERT statement with the correct user_id
+- Check that the user_id matches the UUID from Authentication → Users
+
+### Can't find user in profiles table (Method 1)
 
 **Solution**: 
 - User must sign in at least once to create a profile
-- Or manually create profile:
-  ```sql
-  INSERT INTO public.profiles (id, email, is_admin)
-  VALUES ('user-uuid-here', 'admin@example.com', true);
-  ```
+- Or use Method 2 (admin_users table) instead
 
 ---
 

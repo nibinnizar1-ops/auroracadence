@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
-import { getProductByHandle } from "@/lib/shopify";
+import { getProductByHandle } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { Navigation } from "@/components/Navigation";
 import { toast } from "sonner";

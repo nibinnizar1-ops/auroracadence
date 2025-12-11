@@ -172,8 +172,8 @@ const Profile = () => {
                 <p className="font-medium">{user?.name}</p>
               </div>
               {user?.phone && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Mobile Number</p>
+              <div>
+                <p className="text-sm text-muted-foreground">Mobile Number</p>
                   <p className="font-medium">{user.phone}</p>
                 </div>
               )}
@@ -181,7 +181,7 @@ const Profile = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
                   <p className="font-medium">{user.email}</p>
-                </div>
+              </div>
               )}
               <Button onClick={handleLogout} variant="outline" className="w-full">
                 <LogOut className="h-4 w-4 mr-2" />

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
-import { getProducts, ShopifyProduct } from "@/lib/shopify";
+import { getProducts, ShopifyProduct } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import { toast } from "sonner";

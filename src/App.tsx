@@ -33,25 +33,25 @@ const AppContent = () => {
   }, [initializeAuth]);
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/product/:handle" element={<ProductDetail />} />
-      <Route path="/new-arrivals" element={<NewArrivals />} />
-      <Route path="/office-wear" element={<OfficeWear />} />
-      <Route path="/daily-wear" element={<DailyWear />} />
-      <Route path="/party-wear" element={<PartyWear />} />
-      <Route path="/date-night" element={<DateNight />} />
-      <Route path="/wedding-wear" element={<WeddingWear />} />
-      <Route path="/collections" element={<Collections />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/wishlist" element={<Wishlist />} />
-      <Route path="/checkout" element={<Checkout />} />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/product/:handle" element={<ProductDetail />} />
+          <Route path="/new-arrivals" element={<NewArrivals />} />
+          <Route path="/office-wear" element={<OfficeWear />} />
+          <Route path="/daily-wear" element={<DailyWear />} />
+          <Route path="/party-wear" element={<PartyWear />} />
+          <Route path="/date-night" element={<DateNight />} />
+          <Route path="/wedding-wear" element={<WeddingWear />} />
+          <Route path="/collections" element={<Collections />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/checkout" element={<Checkout />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
   );
 };
 

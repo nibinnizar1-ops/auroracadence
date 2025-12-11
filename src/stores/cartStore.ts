@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { ShopifyProduct, createStorefrontCheckout } from '@/lib/shopify';
+import { ShopifyProduct } from '@/lib/products';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CartItem {
@@ -54,9 +54,9 @@ export const useCartStore = create<CartStore>()(
         let updatedItems: CartItem[];
         if (existingItem) {
           updatedItems = items.map(i =>
-            i.variantId === item.variantId
-              ? { ...i, quantity: i.quantity + item.quantity }
-              : i
+              i.variantId === item.variantId
+                ? { ...i, quantity: i.quantity + item.quantity }
+                : i
           );
         } else {
           updatedItems = [...items, item];
@@ -78,7 +78,7 @@ export const useCartStore = create<CartStore>()(
         }
         
         const updatedItems = get().items.map(item =>
-          item.variantId === variantId ? { ...item, quantity } : item
+            item.variantId === variantId ? { ...item, quantity } : item
         );
         
         set({ items: updatedItems });
@@ -128,18 +128,9 @@ export const useCartStore = create<CartStore>()(
       setLoading: (isLoading) => set({ isLoading }),
 
       createCheckout: async () => {
-        const { items, setLoading, setCheckoutUrl } = get();
-        if (items.length === 0) return;
-
-        setLoading(true);
-        try {
-          const checkoutUrl = await createStorefrontCheckout(items);
-          setCheckoutUrl(checkoutUrl);
-        } catch (error) {
-          console.error('Failed to create checkout:', error);
-        } finally {
-          setLoading(false);
-        }
+        // Checkout is now handled via Razorpay in Checkout page
+        // This function is kept for backward compatibility but does nothing
+        console.log('Checkout is handled via Razorpay on the Checkout page');
       },
 
       // Sync current cart items to database

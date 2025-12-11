@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { ShoppingCart, Heart } from "lucide-react";
-import { getProducts, ShopifyProduct } from "@/lib/shopify";
+import { getProducts, ShopifyProduct } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import { toast } from "sonner";
