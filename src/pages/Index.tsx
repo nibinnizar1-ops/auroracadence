@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { OfferBanner } from "@/components/OfferBanner";
 import { Navigation } from "@/components/Navigation";
 import { HeroCarousel } from "@/components/HeroCarousel";
@@ -11,6 +12,7 @@ import { GiftGuide } from "@/components/GiftGuide";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
 import { StoreLocations } from "@/components/StoreLocations";
 import { InfluencerShowcase } from "@/components/InfluencerShowcase";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   useEffect(() => {
@@ -39,14 +41,6 @@ const Index = () => {
 
       <CategorySection />
 
-      <BannerLuxury />
-
-      <GiftGuide />
-
-      <StoreLocations />
-
-      <InfluencerShowcase />
-
       <section id="new-arrivals" className="py-20 bg-secondary/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -61,21 +55,15 @@ const Index = () => {
         </div>
       </section>
 
-      <footer className="py-12 border-t border-border bg-secondary/20">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold text-foreground mb-4">Aurora Cadence</h3>
-          <p className="text-muted-foreground mb-4">Timeless Elegance, Crafted With Love</p>
-          <div className="flex justify-center gap-8 text-sm text-muted-foreground">
-            <a href="#about" className="hover:text-foreground transition-colors">About</a>
-            <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
-          </div>
-          <p className="text-xs text-muted-foreground mt-8">
-            © 2024 Aurora Cadence. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <BannerLuxury />
+
+      <GiftGuide />
+
+      <InfluencerShowcase />
+
+      <StoreLocations />
+
+      <Footer />
     </div>
   );
 };

@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useCartStore } from "@/stores/cartStore";
-import { toast } from "sonner";
+import { useEffect, useRef } from "react";
+import { Card } from "@/components/ui/card";
 
 const influencers = [
   {
@@ -52,13 +50,35 @@ const influencers = [
 ];
 
 export const InfluencerShowcase = () => {
-  const addItem = useCartStore((state) => state.addItem);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleAddToCart = (influencer: typeof influencers[0]) => {
-    // For now, we'll show a toast. To fully integrate with Shopify cart,
-    // you'll need to connect this to actual Shopify product variants
-    toast.success(`${influencer.product} added to wishlist!`);
-  };
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    let scrollAmount = 0;
+    const scrollSpeed = 0.5; // Adjust speed (pixels per frame)
+    const scrollDirection = 1; // 1 for right, -1 for left
+
+    const animate = () => {
+      if (scrollContainer) {
+        scrollAmount += scrollSpeed * scrollDirection;
+        scrollContainer.scrollLeft = scrollAmount;
+
+        // Reset scroll position when reaching the end
+        if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+          scrollAmount = 0;
+        }
+      }
+      requestAnimationFrame(animate);
+    };
+
+    const animationId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
 
   return (
     <section className="py-20 bg-background">
@@ -72,55 +92,109 @@ export const InfluencerShowcase = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {influencers.map((influencer, index) => (
-            <Card key={index} className="overflow-hidden hover:shadow-xl transition-shadow">
-              <div className="aspect-[4/5] overflow-hidden bg-secondary/20">
-                <iframe
-                  src={influencer.instagramReelUrl}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  scrolling="no"
-                  allowTransparency
-                  allow="encrypted-media"
-                  title={`${influencer.name} Instagram Reel`}
+        <div className="overflow-hidden">
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-6 overflow-x-auto scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              scrollBehavior: 'auto',
+            }}
+          >
+            {influencers.map((influencer, index) => (
+              <Card
+                key={index}
+                className="min-w-[320px] max-w-[320px] h-[500px] overflow-hidden hover:shadow-xl transition-shadow flex-shrink-0 relative"
+              >
+                {/* Full card background image */}
+                <img
+                  src={influencer.image}
+                  alt={`${influencer.name} wearing ${influencer.product}`}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-              </div>
-              <CardContent className="p-6 space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    🌸 {influencer.name}
-                  </h3>
-                  <p className="text-muted-foreground italic text-sm mb-4">
-                    "{influencer.quote}"
-                  </p>
-                </div>
+                
+                {/* Gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                
+                {/* Content overlay */}
+                <div className="relative h-full flex flex-col justify-end p-4 text-white z-10">
+                  <div className="space-y-3 text-center">
+                    <div>
+                      <h3 className="text-base font-semibold text-white mb-1">
+                        {influencer.name}
+                      </h3>
+                      <p className="text-white/90 italic text-xs mb-3 line-clamp-2">
+                        "{influencer.quote}"
+                      </p>
+                    </div>
 
-                <div className="border-t border-border pt-4 space-y-2">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                    She's wearing:
-                  </p>
-                  <h4 className="font-semibold text-foreground">
-                    {influencer.product}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {influencer.description}
-                  </p>
-                  <p className="text-xl font-bold text-foreground">
-                    ₹{influencer.price.toLocaleString()}
-                  </p>
+                    <div className="border-t border-white/20 pt-3 space-y-1.5 text-center">
+                      <p className="text-xs text-white/80 uppercase tracking-wider">
+                        She's wearing:
+                      </p>
+                      <h4 className="font-semibold text-white text-sm">
+                        {influencer.product}
+                      </h4>
+                      <p className="text-xs text-white/80 line-clamp-2">
+                        {influencer.description}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              </Card>
+            ))}
+            {/* Duplicate cards for seamless loop */}
+            {influencers.map((influencer, index) => (
+              <Card
+                key={`duplicate-${index}`}
+                className="min-w-[320px] max-w-[320px] h-[500px] overflow-hidden hover:shadow-xl transition-shadow flex-shrink-0 relative"
+              >
+                {/* Full card background image */}
+                <img
+                  src={influencer.image}
+                  alt={`${influencer.name} wearing ${influencer.product}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                
+                {/* Gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                
+                {/* Content overlay */}
+                <div className="relative h-full flex flex-col justify-end p-4 text-white z-10">
+                  <div className="space-y-3 text-center">
+                    <div>
+                      <h3 className="text-base font-semibold text-white mb-1">
+                        {influencer.name}
+                      </h3>
+                      <p className="text-white/90 italic text-xs mb-3 line-clamp-2">
+                        "{influencer.quote}"
+                      </p>
+                    </div>
 
-                <Button
-                  onClick={() => handleAddToCart(influencer)}
-                  className="w-full"
-                >
-                  Add to Cart
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                    <div className="border-t border-white/20 pt-3 space-y-1.5 text-center">
+                      <p className="text-xs text-white/80 uppercase tracking-wider">
+                        She's wearing:
+                      </p>
+                      <h4 className="font-semibold text-white text-sm">
+                        {influencer.product}
+                      </h4>
+                      <p className="text-xs text-white/80 line-clamp-2">
+                        {influencer.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
+
+        <style>{`
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
       </div>
     </section>
   );

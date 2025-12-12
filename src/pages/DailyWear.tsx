@@ -1,15 +1,18 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { ProductGrid } from "@/components/ProductGrid";
+import { HeroBanner } from "@/components/HeroBanner";
+import heroImage2 from "@/assets/hero-jewelry-2.jpg";
 
 export default function DailyWear() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Daily Wear</h1>
-        <p className="text-muted-foreground mb-12">Comfortable & chic jewelry for everyday elegance</p>
+      <HeroBanner imageUrl={heroImage2} />
+      <div id="products" className="container mx-auto px-4 py-16 flex-grow">
         <ProductGrid />
       </div>
+      <Footer />
     </div>
   );
 }

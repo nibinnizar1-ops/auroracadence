@@ -6,6 +6,7 @@ import { ShoppingCart, ArrowLeft } from "lucide-react";
 import { getProductByHandle } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 
 export default function ProductDetail() {
@@ -52,9 +53,9 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navigation />
-        <div className="container mx-auto px-4 py-20">
+        <div className="container mx-auto px-4 py-20 flex-grow">
           <div className="animate-pulse">
             <div className="h-8 w-32 bg-secondary rounded mb-8" />
             <div className="grid md:grid-cols-2 gap-8">
@@ -67,15 +68,16 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navigation />
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto px-4 py-20 text-center flex-grow">
           <h2 className="text-2xl font-semibold text-foreground mb-4">Product Not Found</h2>
           <Link to="/">
             <Button className="bg-foreground text-background hover:bg-foreground/90">
@@ -83,14 +85,15 @@ export default function ProductDetail() {
             </Button>
           </Link>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 flex-grow">
         <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Products
@@ -172,6 +175,7 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

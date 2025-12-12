@@ -13,6 +13,8 @@ import { Loader2, MapPin, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CouponSelector } from "@/components/CouponSelector";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 
 declare global {
   interface Window {
@@ -285,15 +287,21 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-        <Button onClick={() => navigate("/")}>Continue Shopping</Button>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16 text-center flex-grow">
+          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+          <Button onClick={() => navigate("/")}>Continue Shopping</Button>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 flex-grow">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
       
       <div className="grid lg:grid-cols-2 gap-8">
@@ -564,6 +572,8 @@ export default function Checkout() {
           </CardContent>
         </Card>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }

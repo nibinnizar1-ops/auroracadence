@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -151,10 +152,10 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 flex-grow">
         <h1 className="text-4xl font-bold text-foreground mb-8">My Profile</h1>
         
         <div className="grid md:grid-cols-2 gap-6">
@@ -439,6 +440,7 @@ const Profile = () => {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 };

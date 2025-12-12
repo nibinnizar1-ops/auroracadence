@@ -36,7 +36,6 @@ export const Navigation = () => {
     { label: "Date Night", href: "/date-night" },
     { label: "Wedding Wear", href: "/wedding-wear" },
     { label: "Collections", href: "/collections" },
-    { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ];
 

@@ -1,15 +1,18 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { ProductGrid } from "@/components/ProductGrid";
+import { HeroBanner } from "@/components/HeroBanner";
+import heroImage3 from "@/assets/hero-jewelry-3.jpg";
 
 export default function WeddingWear() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Wedding Wear</h1>
-        <p className="text-muted-foreground mb-12">Timeless & luxurious jewelry for your special day</p>
+      <HeroBanner imageUrl={heroImage3} />
+      <div id="products" className="container mx-auto px-4 py-16 flex-grow">
         <ProductGrid />
       </div>
+      <Footer />
     </div>
   );
 }

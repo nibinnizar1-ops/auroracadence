@@ -1,20 +1,19 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { FilteredProductGrid } from "@/components/FilteredProductGrid";
-import bannerCollection from "@/assets/banner-collection.jpg";
+import { HeroBanner } from "@/components/HeroBanner";
 import bannerLuxury from "@/assets/banner-luxury.jpg";
+import heroImage1 from "@/assets/hero-jewelry-1.jpg";
 
 export default function Collections() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Collections</h1>
-        <p className="text-muted-foreground mb-12">Explore our curated collections of fine jewelry</p>
-        
+      <HeroBanner imageUrl={heroImage1} />
+      <div id="collections" className="container mx-auto px-4 py-16 flex-grow">
         <div className="space-y-16">
           <div>
-            <img src={bannerCollection} alt="Aurora Cadence Collection" className="w-full h-[300px] object-cover rounded-lg mb-8" />
-            <h2 className="text-3xl font-bold text-foreground mb-8">Aurora Collection</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Aurora Collection</h2>
             <FilteredProductGrid />
           </div>
           
@@ -25,6 +24,7 @@ export default function Collections() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

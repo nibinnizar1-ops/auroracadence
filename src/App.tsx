@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
+import { PageWrapper } from "@/components/PageWrapper";
+import { SwipeBackHandler } from "@/components/SwipeBackHandler";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
@@ -17,6 +19,8 @@ import WeddingWear from "./pages/WeddingWear";
 import Collections from "./pages/Collections";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
@@ -30,28 +34,50 @@ const AppContent = () => {
   useEffect(() => {
     // Initialize auth state when app loads
     initializeAuth();
+
+    // Ensure browser navigation (trackpad swipes) works with React Router
+    // React Router's BrowserRouter handles this, but we ensure it's working
+    const handlePopState = (event: PopStateEvent) => {
+      // This event fires when user uses browser back/forward or trackpad swipe
+      // React Router's BrowserRouter should handle this automatically
+      // We just ensure the event isn't blocked
+    };
+
+    // Add listener for browser navigation events (including trackpad swipes)
+    window.addEventListener("popstate", handlePopState, { passive: true });
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   }, [initializeAuth]);
 
   return (
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/product/:handle" element={<ProductDetail />} />
-          <Route path="/new-arrivals" element={<NewArrivals />} />
-          <Route path="/office-wear" element={<OfficeWear />} />
-          <Route path="/daily-wear" element={<DailyWear />} />
-          <Route path="/party-wear" element={<PartyWear />} />
-          <Route path="/date-night" element={<DateNight />} />
-          <Route path="/wedding-wear" element={<WeddingWear />} />
-          <Route path="/collections" element={<Collections />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/checkout" element={<Checkout />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <>
+          <SwipeBackHandler />
+          <PageWrapper>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/product/:handle" element={<ProductDetail />} />
+              <Route path="/new-arrivals" element={<NewArrivals />} />
+              <Route path="/office-wear" element={<OfficeWear />} />
+              <Route path="/daily-wear" element={<DailyWear />} />
+              <Route path="/party-wear" element={<PartyWear />} />
+              <Route path="/date-night" element={<DateNight />} />
+              <Route path="/wedding-wear" element={<WeddingWear />} />
+              <Route path="/collections" element={<Collections />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PageWrapper>
+        </>
   );
 };
 
