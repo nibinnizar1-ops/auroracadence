@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CouponSelector } from "@/components/CouponSelector";
 
 declare global {
   interface Window {
@@ -21,12 +22,23 @@ declare global {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, clearCart } = useCartStore();
+  const { 
+    items, 
+    clearCart, 
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
+    getSubtotal,
+    getDiscount,
+    getTotal
+  } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
   const { addresses, loadAddresses, getDefaultAddress } = useAddressStore();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
   const [saveAddress, setSaveAddress] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -97,10 +109,36 @@ export default function Checkout() {
     }
   };
 
-  const totalPrice = items.reduce(
-    (sum, item) => sum + parseFloat(item.price.amount) * item.quantity,
-    0
-  );
+  const subtotal = getSubtotal();
+  const discount = getDiscount();
+  const totalPrice = getTotal();
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    try {
+      const result = await applyCoupon(couponCode, user?.id);
+      if (result.valid) {
+        toast.success(`Coupon "${result.coupon?.code}" applied! You saved ₹${result.discount.toFixed(2)}`);
+        setCouponCode("");
+      } else {
+        toast.error(result.error || "Invalid coupon code");
+      }
+    } catch (error) {
+      toast.error("Failed to apply coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    toast.success("Coupon removed");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -180,6 +218,7 @@ export default function Checkout() {
               price: item.price.amount,
               quantity: item.quantity,
             })),
+            couponCode: appliedCoupon?.code || null,
           },
         }
       );
@@ -441,12 +480,77 @@ export default function Checkout() {
             ))}
             
             <Separator />
+
+            {/* Coupon Selector */}
+            <CouponSelector onCouponApplied={() => setCouponCode("")} />
+
+            {/* Manual Coupon Input (Alternative) */}
+            <div className="space-y-2">
+              {!appliedCoupon ? (
+                <div className="space-y-2">
+                  <Label htmlFor="coupon">Or enter coupon code manually</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="coupon"
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleApplyCoupon();
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !couponCode.trim()}
+                      variant="outline"
+                    >
+                      {isApplyingCoupon ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Tag className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{appliedCoupon.code}</span>
+                    <span className="text-xs text-muted-foreground">
+                      -₹{discount.toFixed(2)}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={handleRemoveCoupon}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            <Separator />
             
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>₹{totalPrice.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-primary">
+                  <span>Discount ({appliedCoupon.code})</span>
+                  <span>-₹{discount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span>Free</span>

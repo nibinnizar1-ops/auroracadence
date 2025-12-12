@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ShopifyProduct } from '@/lib/products';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoupon, CouponValidationResult } from '@/lib/coupons';
 
 export interface CartItem {
   product: ShopifyProduct;
@@ -18,12 +19,21 @@ export interface CartItem {
   }>;
 }
 
+interface AppliedCoupon {
+  code: string;
+  discount: number;
+  couponId: string;
+  discountType: 'percentage' | 'fixed_amount';
+  discountValue: number;
+}
+
 interface CartStore {
   items: CartItem[];
   cartId: string | null;
   checkoutUrl: string | null;
   isLoading: boolean;
   isSyncing: boolean;
+  appliedCoupon: AppliedCoupon | null;
   
   addItem: (item: CartItem) => void;
   updateQuantity: (variantId: string, quantity: number) => void;
@@ -36,6 +46,11 @@ interface CartStore {
   syncToDatabase: (userId: string) => Promise<void>;
   loadFromDatabase: (userId: string) => Promise<void>;
   mergeWithDatabase: (userId: string) => Promise<void>;
+  applyCoupon: (code: string, userId?: string) => Promise<CouponValidationResult>;
+  removeCoupon: () => void;
+  getSubtotal: () => number;
+  getTotal: () => number;
+  getDiscount: () => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -46,6 +61,7 @@ export const useCartStore = create<CartStore>()(
       checkoutUrl: null,
       isLoading: false,
       isSyncing: false,
+      appliedCoupon: null,
 
       addItem: async (item) => {
         const { items } = get();
@@ -106,7 +122,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: async () => {
-        set({ items: [], cartId: null, checkoutUrl: null });
+        set({ items: [], cartId: null, checkoutUrl: null, appliedCoupon: null });
         
         // Clear from database if user is logged in
         try {
@@ -251,6 +267,52 @@ export const useCartStore = create<CartStore>()(
         } finally {
           set({ isSyncing: false });
         }
+      },
+
+      // Apply coupon
+      applyCoupon: async (code: string, userId?: string) => {
+        const { items } = get();
+        const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+        
+        const result = await validateCoupon(code, subtotal, userId);
+        
+        if (result.valid && result.coupon) {
+          set({
+            appliedCoupon: {
+              code: result.coupon.code,
+              discount: result.discount,
+              couponId: result.coupon.id,
+              discountType: result.coupon.discount_type,
+              discountValue: result.coupon.discount_value,
+            },
+          });
+        }
+        
+        return result;
+      },
+
+      // Remove coupon
+      removeCoupon: () => {
+        set({ appliedCoupon: null });
+      },
+
+      // Get subtotal (before discount)
+      getSubtotal: () => {
+        const { items } = get();
+        return items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+      },
+
+      // Get discount amount
+      getDiscount: () => {
+        const { appliedCoupon } = get();
+        return appliedCoupon?.discount || 0;
+      },
+
+      // Get total (after discount)
+      getTotal: () => {
+        const subtotal = get().getSubtotal();
+        const discount = get().getDiscount();
+        return Math.max(0, subtotal - discount);
       },
     }),
     {

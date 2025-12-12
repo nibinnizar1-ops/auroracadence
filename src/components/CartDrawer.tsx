@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -10,24 +11,65 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2, X, Tag } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "sonner";
+import { CouponSelector } from "./CouponSelector";
 
 export const CartDrawer = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const { 
     items, 
     updateQuantity, 
-    removeItem
+    removeItem,
+    appliedCoupon,
+    applyCoupon,
+    removeCoupon,
+    getSubtotal,
+    getDiscount,
+    getTotal
   } = useCartStore();
+  const { user } = useAuthStore();
   
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+  const subtotal = getSubtotal();
+  const discount = getDiscount();
+  const total = getTotal();
 
   const handleCheckout = () => {
     setIsOpen(false);
     navigate('/checkout');
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    try {
+      const result = await applyCoupon(couponCode, user?.id);
+      if (result.valid) {
+        toast.success(`Coupon "${result.coupon?.code}" applied! You saved ₹${result.discount.toFixed(2)}`);
+        setCouponCode("");
+      } else {
+        toast.error(result.error || "Invalid coupon code");
+      }
+    } catch (error) {
+      toast.error("Failed to apply coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeCoupon();
+    toast.success("Coupon removed");
   };
 
   return (
@@ -121,11 +163,75 @@ export const CartDrawer = () => {
               </div>
               
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-xl font-bold text-foreground">
-                    {items[0]?.price.currencyCode || 'INR'} {totalPrice.toFixed(2)}
-                  </span>
+                {/* Coupon Selector */}
+                <CouponSelector onCouponApplied={() => setCouponCode("")} />
+
+                {/* Manual Coupon Input (Alternative) */}
+                {!appliedCoupon ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Or enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleApplyCoupon();
+                          }
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleApplyCoupon}
+                        disabled={isApplyingCoupon || !couponCode.trim()}
+                        variant="outline"
+                      >
+                        {isApplyingCoupon ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Tag className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-secondary/30 rounded-md">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">{appliedCoupon.code}</span>
+                      <span className="text-xs text-muted-foreground">
+                        -₹{discount.toFixed(2)}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={handleRemoveCoupon}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Price Summary */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>{items[0]?.price.currencyCode || 'INR'} {subtotal.toFixed(2)}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-sm text-primary">
+                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>-{items[0]?.price.currencyCode || 'INR'} {discount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-lg font-semibold">Total</span>
+                    <span className="text-xl font-bold text-foreground">
+                      {items[0]?.price.currencyCode || 'INR'} {total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
                 
                 <Button 

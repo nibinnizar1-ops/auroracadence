@@ -12,13 +12,59 @@ serve(async (req) => {
   }
 
   try {
-    const { amount, currency, customerInfo, items, userId } = await req.json();
+    const { amount, currency, customerInfo, items, userId, couponCode } = await req.json();
     
     const zwitchAccessKey = Deno.env.get('ZWITCH_ACCESS_KEY');
     const zwitchSecretKey = Deno.env.get('ZWITCH_SECRET_KEY');
     
     if (!zwitchAccessKey || !zwitchSecretKey) {
       throw new Error('Zwitch credentials not configured');
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Validate coupon if provided (server-side final validation)
+    let couponId: string | null = null;
+    let discountAmount = 0;
+    let orderSubtotal = amount / 100; // Amount is in paise, convert to rupees
+    let orderTotal = orderSubtotal;
+
+    if (couponCode) {
+      try {
+        // Call validate-coupon function for final server-side validation
+        const validateResponse = await fetch(`${supabaseUrl}/functions/v1/validate-coupon`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({
+            code: couponCode,
+            cartTotal: orderSubtotal,
+            userId: userId || null,
+            cartItems: items.map((item: any) => ({
+              product_id: item.id,
+            })),
+          }),
+        });
+
+        if (validateResponse.ok) {
+          const validationResult = await validateResponse.json();
+          if (validationResult.valid && validationResult.coupon) {
+            couponId = validationResult.coupon.id;
+            discountAmount = validationResult.discount;
+            orderTotal = validationResult.finalTotal;
+          } else {
+            // Coupon invalid - log but continue without coupon
+            console.warn('Coupon validation failed:', validationResult.error);
+          }
+        }
+      } catch (error) {
+        console.error('Error validating coupon:', error);
+        // Continue without coupon if validation fails
+      }
     }
 
     const mtx = `MTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -31,7 +77,7 @@ serve(async (req) => {
         'Authorization': 'Bearer ' + zwitchSecretKey,
       },
       body: JSON.stringify({
-        amount: amount / 100, // Zwitch expects amount in rupees, not paise
+        amount: orderTotal, // Use order total after discount
         currency: currency || 'INR',
         contact_number: customerInfo.phone,
         email_id: customerInfo.email,
@@ -55,10 +101,6 @@ serve(async (req) => {
     const zwitchPayment = await tokenResponse.json();
     
     // Create order in database
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     const { data: dbOrder, error: dbError } = await supabase
       .from('orders')
       .insert({
@@ -80,9 +122,11 @@ serve(async (req) => {
           pincode: customerInfo.pincode,
         },
         items,
-        subtotal: amount / 100,
-        total: amount / 100,
+        subtotal: orderSubtotal,
+        total: orderTotal,
         currency: currency || 'INR',
+        coupon_id: couponId,
+        discount_amount: discountAmount,
         razorpay_order_id: zwitchPayment.id,
         payment_method: 'zwitch',
         payment_status: 'pending',
@@ -96,13 +140,27 @@ serve(async (req) => {
       throw new Error('Failed to create order in database');
     }
 
+    // Record coupon usage if coupon was applied
+    if (couponId && discountAmount > 0) {
+      await supabase
+        .from('coupon_usage')
+        .insert({
+          coupon_id: couponId,
+          order_id: dbOrder.id,
+          user_id: userId || null,
+          discount_amount: discountAmount,
+          order_total_before_discount: orderSubtotal,
+          order_total_after_discount: orderTotal,
+        });
+    }
+
     console.log('Zwitch payment token created:', zwitchPayment.id);
 
     return new Response(
       JSON.stringify({
         paymentToken: zwitchPayment.id,
         accessKey: zwitchAccessKey,
-        amount: amount / 100,
+        amount: orderTotal,
         currency: currency || 'INR',
         mtx: mtx,
         dbOrderId: dbOrder.id,
