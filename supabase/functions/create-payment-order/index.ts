@@ -96,7 +96,7 @@ async function createZwitchPaymentOrder(
       error: errorText,
       requestUrl: `${apiBaseUrl}payment_token`,
       requestBody: {
-        amount: request.amount,
+        amount: Math.round(request.amount * 100), // Converted to paise
         currency: request.currency,
         contact_number: request.customerInfo.phone,
         email_id: request.customerInfo.email,
