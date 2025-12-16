@@ -71,7 +71,7 @@ async function createZwitchPaymentOrder(
       "Authorization": `Bearer ${secretKey}`,
     },
     body: JSON.stringify({
-      amount: Math.round(request.amount * 100), // Convert to paise for Zwitch API
+      amount: request.amount, // Zwitch expects amount in rupees (not paise)
       currency: request.currency || "INR",
       contact_number: request.customerInfo.phone,
       email_id: request.customerInfo.email,
@@ -96,7 +96,7 @@ async function createZwitchPaymentOrder(
       error: errorText,
       requestUrl: `${apiBaseUrl}payment_token`,
       requestBody: {
-        amount: Math.round(request.amount * 100), // Converted to paise
+        amount: request.amount, // Amount in rupees (Zwitch expects rupees, not paise)
         currency: request.currency,
         contact_number: request.customerInfo.phone,
         email_id: request.customerInfo.email,
