@@ -1,176 +1,195 @@
-# Google Auth Configuration Verification Checklist
+# Migration Verification Checklist
 
-Use this checklist to verify your Google OAuth setup is correct.
+## ✅ Tables Created (From Your Dashboard)
 
-## ✅ Supabase Configuration
+Based on your Supabase dashboard, I can see these new tables were successfully created:
 
-### 1. Google Provider Enabled
-- [ ] Go to: **Supabase Dashboard** → **Authentication** → **Providers**
-- [ ] Find **"Google"** in the list
-- [ ] Toggle is **ON** (blue/green, not gray)
-- [ ] **Client ID** field is filled (should look like: `123456789-xxxxx.apps.googleusercontent.com`)
-- [ ] **Client Secret** field is filled (should look like: `GOCSPX-xxxxx`)
-- [ ] Clicked **"Save"** button
+1. ✅ `banners` - For hero, collection, and luxury banners
+2. ✅ `category_showcase_items` - For "EVERYDAY LUXURY JEWELLERY" section
+3. ✅ `gift_guide_items` - For "Timeless Gifts For Every Relationship" section
+4. ✅ `influencer_showcase_items` - For "Worn by Women. Who Inspire Us." section
+5. ✅ `luxury_mood_categories` - For "LUXURY MOODS" carousel
+6. ✅ `store_locations` - For "Try Love. Take Home." section
 
-### 2. Redirect URLs Configured
-- [ ] Go to: **Supabase Dashboard** → **Authentication** → **URL Configuration**
-- [ ] Under **"Redirect URLs"**, you have:
-  - [ ] `http://localhost:8080/auth/callback` (for development)
-- [ ] **Site URL** is set to: `http://localhost:8080` (or your production URL)
-- [ ] Clicked **"Save"** button
-
-### 3. Project Information
-- [ ] Your Supabase Project URL: `https://wkvotycwrvimfiacbsjk.supabase.co`
-- [ ] Project Reference: `wkvotycwrvimfiacbsjk`
+**Total: 6 new tables created!** ✅
 
 ---
 
-## ✅ Google Cloud Console Configuration
+## 🔍 Verification Steps
 
-### 1. OAuth Credentials Created
-- [ ] Go to: **Google Cloud Console** → **APIs & Services** → **Credentials**
-- [ ] You have an **"OAuth 2.0 Client ID"** created
-- [ ] Application type is **"Web application"**
+### Step 1: Verify Tables Exist
 
-### 2. Authorized Redirect URIs
-- [ ] In your OAuth Client settings, under **"Authorized redirect URIs"**, you have:
-  - [ ] `https://wkvotycwrvimfiacbsjk.supabase.co/auth/v1/callback`
-  - [ ] (Optional) `http://localhost:8080/auth/callback` for direct testing
-- [ ] **Important**: The Supabase redirect URI must be exactly: `https://wkvotycwrvimfiacbsjk.supabase.co/auth/v1/callback`
-- [ ] No trailing slashes
-- [ ] Includes `/v1` in the path
+Run this query in SQL Editor to confirm all tables exist:
 
-### 3. Authorized JavaScript Origins
-- [ ] Under **"Authorized JavaScript origins"**, you have:
-  - [ ] `http://localhost:8080` (for development)
-  - [ ] (Optional) Your production domain
-
-### 4. OAuth Consent Screen
-- [ ] OAuth consent screen is configured
-- [ ] App name is set
-- [ ] Support email is set
-- [ ] (If in testing) Test users are added (if needed)
-
----
-
-## ✅ Code Configuration
-
-### 1. Environment Variables
-- [ ] `.env` file exists
-- [ ] `VITE_SUPABASE_URL` is set: `https://wkvotycwrvimfiacbsjk.supabase.co`
-- [ ] `VITE_SUPABASE_PUBLISHABLE_KEY` is set (starts with `eyJ...`)
-
-### 2. Routes
-- [ ] `/auth/callback` route exists in `App.tsx` ✅ (Verified in code)
-- [ ] Route points to `AuthCallback` component ✅ (Verified in code)
-
-### 3. Auth Store
-- [ ] `signInWithGoogle()` function exists ✅ (Verified in code)
-- [ ] Redirect URL uses `window.location.origin` ✅ (Verified in code)
-
----
-
-## 🧪 Testing Steps
-
-### Test 1: Check Provider Status
-1. Open browser console (F12)
-2. Go to your app: `http://localhost:8080`
-3. Try to sign in with Google
-4. Check console for any errors
-
-### Test 2: Verify Redirect
-1. Click "Sign in with Google"
-2. Should redirect to Google sign-in page
-3. After signing in, should redirect back to your app
-4. Should see "Successfully signed in!" toast message
-
-### Test 3: Check Session
-1. After successful sign-in, go to browser console
-2. Type: `localStorage.getItem('sb-wkvotycwrvimfiacbsjk-auth-token')`
-3. Should return a token (or check Supabase session)
-
----
-
-## 🔍 Common Issues to Check
-
-### Issue: "provider is not enabled"
-**Check:**
-- [ ] Google provider toggle is ON in Supabase
-- [ ] You clicked "Save" after enabling
-- [ ] Wait 10-30 seconds for changes to propagate
-- [ ] Try refreshing the page
-
-### Issue: "redirect_uri_mismatch"
-**Check:**
-- [ ] Redirect URI in Google Cloud Console exactly matches: `https://wkvotycwrvimfiacbsjk.supabase.co/auth/v1/callback`
-- [ ] No typos in the URL
-- [ ] Includes `/v1` in the path
-- [ ] No trailing slash
-
-### Issue: "Invalid client"
-**Check:**
-- [ ] Client ID in Supabase matches Google Cloud Console
-- [ ] Client Secret in Supabase matches Google Cloud Console
-- [ ] No extra spaces when copying/pasting
-- [ ] Both fields are filled in Supabase
-
-### Issue: Not redirecting after Google sign-in
-**Check:**
-- [ ] Redirect URL in Supabase: `http://localhost:8080/auth/callback`
-- [ ] Site URL in Supabase: `http://localhost:8080`
-- [ ] Route exists in App.tsx ✅ (Already verified)
-
----
-
-## 📋 Quick Verification Commands
-
-### Check if server is running:
-```bash
-curl http://localhost:8080
+```sql
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public' 
+AND table_name IN (
+  'banners',
+  'category_showcase_items',
+  'luxury_mood_categories',
+  'gift_guide_items',
+  'influencer_showcase_items',
+  'store_locations'
+)
+ORDER BY table_name;
 ```
 
-### Check environment variables:
-```bash
-# In your project root
-cat .env | grep SUPABASE
+**Expected Result**: 6 rows returned
+
+---
+
+### Step 2: Verify Products Table Has Discount Columns
+
+Run this query to check if discount columns were added:
+
+```sql
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_schema = 'public' 
+AND table_name = 'products' 
+AND column_name IN (
+  'discount_type',
+  'discount_value',
+  'discount_valid_from',
+  'discount_valid_until',
+  'eligible_for_coupons'
+)
+ORDER BY column_name;
 ```
 
----
-
-## ✅ Final Checklist
-
-Before testing, make sure:
-- [ ] Supabase Google provider is **ON**
-- [ ] Client ID and Secret are **filled** in Supabase
-- [ ] Redirect URL `http://localhost:8080/auth/callback` is **added** in Supabase
-- [ ] Redirect URI `https://wkvotycwrvimfiacbsjk.supabase.co/auth/v1/callback` is **added** in Google Cloud Console
-- [ ] All changes are **saved** in both dashboards
-- [ ] Dev server is **running** on port 8080
-- [ ] Browser is **refreshed** after making changes
+**Expected Result**: 5 rows returned
 
 ---
 
-## 🆘 Still Having Issues?
+### Step 3: Verify RLS Policies
 
-1. **Clear browser cache and localStorage:**
-   - Open browser console (F12)
-   - Go to Application tab → Clear Storage → Clear site data
-   - Refresh page
+Check if RLS is enabled and policies exist:
 
-2. **Check Supabase Logs:**
-   - Go to Supabase Dashboard → Logs → API Logs
-   - Look for authentication errors
+```sql
+-- Check RLS is enabled
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public' 
+AND tablename IN (
+  'banners',
+  'category_showcase_items',
+  'luxury_mood_categories',
+  'gift_guide_items',
+  'influencer_showcase_items',
+  'store_locations'
+)
+ORDER BY tablename;
+```
 
-3. **Verify in Browser Console:**
-   - Open browser console (F12)
-   - Try signing in
-   - Check for any error messages
-   - Share the error message for debugging
-
-4. **Double-check URLs:**
-   - Make sure all URLs match exactly (no typos, correct ports, correct paths)
+**Expected Result**: All tables should have `rowsecurity = true`
 
 ---
 
-**Once all items are checked ✅, your Google authentication should work!**
+### Step 4: Verify Indexes
 
+Check if indexes were created:
+
+```sql
+SELECT tablename, indexname 
+FROM pg_indexes 
+WHERE schemaname = 'public' 
+AND tablename IN (
+  'banners',
+  'category_showcase_items',
+  'luxury_mood_categories',
+  'gift_guide_items',
+  'influencer_showcase_items',
+  'store_locations'
+)
+ORDER BY tablename, indexname;
+```
+
+**Expected Result**: Multiple indexes (at least 2 per table)
+
+---
+
+### Step 5: Test Admin Access
+
+1. Go to your app: `/admin`
+2. Check if you can see:
+   - Category Showcase section
+   - Luxury Moods section
+   - Gift Guide section
+   - Influencers section
+   - Stores section
+   - Banners section (if already existed)
+
+---
+
+## 📋 Quick Verification Query
+
+Run this single query to verify everything at once:
+
+```sql
+-- Comprehensive verification
+SELECT 
+  'Tables' as check_type,
+  COUNT(*) as count,
+  string_agg(table_name, ', ' ORDER BY table_name) as items
+FROM information_schema.tables 
+WHERE table_schema = 'public' 
+AND table_name IN (
+  'banners',
+  'category_showcase_items',
+  'luxury_mood_categories',
+  'gift_guide_items',
+  'influencer_showcase_items',
+  'store_locations'
+)
+
+UNION ALL
+
+SELECT 
+  'Product Discount Columns' as check_type,
+  COUNT(*) as count,
+  string_agg(column_name, ', ' ORDER BY column_name) as items
+FROM information_schema.columns 
+WHERE table_schema = 'public' 
+AND table_name = 'products' 
+AND column_name IN (
+  'discount_type',
+  'discount_value',
+  'discount_valid_from',
+  'discount_valid_until',
+  'eligible_for_coupons'
+);
+```
+
+**Expected Result**: 
+- First row: 6 tables listed
+- Second row: 5 columns listed
+
+---
+
+## ✅ Success Criteria
+
+All migrations are successful if:
+
+- [x] 6 new tables exist in your dashboard
+- [ ] Products table has 5 new discount columns
+- [ ] RLS is enabled on all new tables
+- [ ] Indexes are created
+- [ ] Admin panel shows all new sections
+- [ ] No errors when accessing admin pages
+
+---
+
+## 🎯 Next Steps
+
+Once verified:
+
+1. **Test Admin Panel**: Go to `/admin` and check all sections
+2. **Add Sample Data**: Create a few test items in each section
+3. **Check Frontend**: Visit homepage and verify sections load (with fallback data if empty)
+4. **Update Social Links**: Edit `src/components/Footer.tsx` if needed
+
+---
+
+**Everything looks good from your dashboard! Let me know if you want me to verify anything specific.** 🎉

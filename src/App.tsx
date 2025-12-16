@@ -25,6 +25,34 @@ import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
 import AuthCallback from "./pages/AuthCallback";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminReturns from "./pages/admin/Returns";
+import AdminReturnDetail from "./pages/admin/ReturnDetail";
+import AdminProducts from "./pages/admin/Products";
+import ProductForm from "./pages/admin/ProductForm";
+import ProductPreview from "./pages/admin/ProductPreview";
+import AdminOrders from "./pages/admin/Orders";
+import AdminOrderDetail from "./pages/admin/OrderDetail";
+import AdminPayments from "./pages/admin/Payments";
+import AdminPaymentGateways from "./pages/admin/PaymentGateways";
+import PaymentGatewayForm from "./pages/admin/PaymentGatewayForm";
+import AdminCoupons from "./pages/admin/Coupons";
+import CouponForm from "./pages/admin/CouponForm";
+import AdminBanners from "./pages/admin/media/Banners";
+import BannerForm from "./pages/admin/media/BannerForm";
+import CategoryShowcase from "./pages/admin/media/CategoryShowcase";
+import CategoryShowcaseForm from "./pages/admin/media/CategoryShowcaseForm";
+import LuxuryMoods from "./pages/admin/media/LuxuryMoods";
+import LuxuryMoodsForm from "./pages/admin/media/LuxuryMoodsForm";
+import GiftGuide from "./pages/admin/media/GiftGuide";
+import GiftGuideForm from "./pages/admin/media/GiftGuideForm";
+import Influencers from "./pages/admin/media/Influencers";
+import InfluencerForm from "./pages/admin/media/InfluencerForm";
+import Stores from "./pages/admin/media/Stores";
+import StoreForm from "./pages/admin/media/StoreForm";
+import Settings from "./pages/admin/Settings";
+// Social Media management skipped - links stored in frontend Footer component
+// import SocialMedia from "./pages/admin/SocialMedia";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +101,44 @@ const AppContent = () => {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/products/new" element={<ProductForm />} />
+              <Route path="/admin/products/:id/edit" element={<ProductForm />} />
+              <Route path="/admin/products/:id/preview" element={<ProductPreview />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+              <Route path="/admin/payments" element={<AdminPayments />} />
+              <Route path="/admin/payments/gateways" element={<AdminPaymentGateways />} />
+              <Route path="/admin/payments/gateways/:id/configure" element={<PaymentGatewayForm />} />
+              <Route path="/admin/returns" element={<AdminReturns />} />
+              <Route path="/admin/returns/:id" element={<AdminReturnDetail />} />
+              <Route path="/admin/coupons" element={<AdminCoupons />} />
+              <Route path="/admin/coupons/new" element={<CouponForm />} />
+              <Route path="/admin/coupons/:id/edit" element={<CouponForm />} />
+              <Route path="/admin/banners" element={<AdminBanners />} />
+              <Route path="/admin/banners/new" element={<BannerForm />} />
+              <Route path="/admin/banners/:id/edit" element={<BannerForm />} />
+              <Route path="/admin/category-showcase" element={<CategoryShowcase />} />
+              <Route path="/admin/category-showcase/new" element={<CategoryShowcaseForm />} />
+              <Route path="/admin/category-showcase/:id/edit" element={<CategoryShowcaseForm />} />
+              <Route path="/admin/luxury-moods" element={<LuxuryMoods />} />
+              <Route path="/admin/luxury-moods/new" element={<LuxuryMoodsForm />} />
+              <Route path="/admin/luxury-moods/:id/edit" element={<LuxuryMoodsForm />} />
+              <Route path="/admin/gift-guide" element={<GiftGuide />} />
+              <Route path="/admin/gift-guide/new" element={<GiftGuideForm />} />
+              <Route path="/admin/gift-guide/:id/edit" element={<GiftGuideForm />} />
+              <Route path="/admin/influencers" element={<Influencers />} />
+              <Route path="/admin/influencers/new" element={<InfluencerForm />} />
+              <Route path="/admin/influencers/:id/edit" element={<InfluencerForm />} />
+              <Route path="/admin/stores" element={<Stores />} />
+              <Route path="/admin/stores/new" element={<StoreForm />} />
+              <Route path="/admin/stores/:id/edit" element={<StoreForm />} />
+              {/* Settings page deferred - product types/categories management will be added later */}
+              {/* <Route path="/admin/settings" element={<Settings />} /> */}
+              {/* Social Media management skipped - links stored in frontend Footer component */}
+              {/* <Route path="/admin/social-media" element={<SocialMedia />} /> */}
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

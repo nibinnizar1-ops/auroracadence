@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getActiveGiftGuideItems } from "@/lib/gift-guide";
 import realWife from "@/assets/real-wife.jpg";
 import realGirlfriend from "@/assets/real-girlfriend.jpg";
 import realMom from "@/assets/real-mom.jpg";
@@ -6,15 +8,35 @@ import realSister from "@/assets/real-sister.jpg";
 import realDaughter from "@/assets/real-daughter.jpg";
 import realFriend from "@/assets/real-friend.jpg";
 
-const giftCategories = [
-  { name: "WIFE", label: "Gifts for", illustration: realWife, color: "from-rose-500 to-pink-600", href: "/collections" },
-  { name: "GIRLFRIEND", label: "Gifts for", illustration: realGirlfriend, color: "from-purple-500 to-pink-500", href: "/collections" },
-  { name: "MOM", label: "Gifts for", illustration: realMom, color: "from-amber-500 to-rose-500", href: "/collections" },
-  { name: "SISTER", label: "Gifts for", illustration: realSister, color: "from-blue-500 to-purple-500", href: "/collections" },
-  { name: "BEST FRIEND", label: "Gifts for", illustration: realFriend, color: "from-teal-500 to-blue-500", href: "/collections" },
+const defaultGiftCategories = [
+  { name: "WIFE", label: "Gifts for", image_url: realWife, color: "from-rose-500 to-pink-600", href: "/collections" },
+  { name: "GIRLFRIEND", label: "Gifts for", image_url: realGirlfriend, color: "from-purple-500 to-pink-500", href: "/collections" },
+  { name: "MOM", label: "Gifts for", image_url: realMom, color: "from-amber-500 to-rose-500", href: "/collections" },
+  { name: "SISTER", label: "Gifts for", image_url: realSister, color: "from-blue-500 to-purple-500", href: "/collections" },
+  { name: "BEST FRIEND", label: "Gifts for", image_url: realFriend, color: "from-teal-500 to-blue-500", href: "/collections" },
 ];
 
 export const GiftGuide = () => {
+  const [giftCategories, setGiftCategories] = useState(defaultGiftCategories);
+
+  useEffect(() => {
+    const loadGiftCategories = async () => {
+      const data = await getActiveGiftGuideItems();
+      // Merge database items with defaults - use database image if exists, otherwise use default
+      const mergedCategories = defaultGiftCategories.map(defaultItem => {
+        const dbItem = data.find(item => item.name === defaultItem.name);
+        return {
+          name: defaultItem.name,
+          label: dbItem?.label || defaultItem.label,
+          image_url: dbItem?.image_url || defaultItem.image_url,
+          color: defaultItem.color, // Keep default color
+          href: dbItem?.href || defaultItem.href,
+        };
+      });
+      setGiftCategories(mergedCategories);
+    };
+    loadGiftCategories();
+  }, []);
 
   return (
     <section className="py-20 bg-gradient-to-b from-background via-secondary/20 to-background overflow-hidden">
@@ -40,7 +62,7 @@ export const GiftGuide = () => {
                 {/* Image Background */}
                 <div className="absolute inset-0 overflow-hidden">
                   <img 
-                    src={category.illustration} 
+                    src={category.image_url} 
                     alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />

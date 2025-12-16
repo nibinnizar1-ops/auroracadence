@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
-import { getProducts, ShopifyProduct } from "@/lib/products";
+import { getProducts, getProductsByCategory, ShopifyProduct } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import { toast } from "sonner";
@@ -19,21 +19,30 @@ export const FilteredProductGrid = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await getProducts(50);
+        setLoading(true);
+        let data: ShopifyProduct[];
+        
+        if (activeFilter === "All") {
+          // Fetch all products
+          data = await getProducts(50);
+        } else {
+          // Fetch products by category name (from product_categories junction table)
+          data = await getProductsByCategory(activeFilter, 50);
+        }
+        
         setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [activeFilter]);
 
-  const filteredProducts = activeFilter === "All" 
-    ? products 
-    : products.filter(product => product.node.productType === activeFilter);
+  const filteredProducts = products;
 
   const handleToggleWishlist = (product: ShopifyProduct, e: React.MouseEvent) => {
     e.preventDefault();

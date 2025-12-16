@@ -3,6 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { ShopifyProduct } from '@/lib/products';
 import { supabase } from '@/integrations/supabase/client';
 import { validateCoupon, CouponValidationResult } from '@/lib/coupons';
+import { checkInventory } from '@/lib/inventory';
+import { toast } from 'sonner';
 
 export interface CartItem {
   product: ShopifyProduct;
@@ -64,14 +66,43 @@ export const useCartStore = create<CartStore>()(
       appliedCoupon: null,
 
       addItem: async (item) => {
+        // Check inventory before adding
+        const inventoryCheck = await checkInventory(item.variantId, item.quantity);
+        
+        if (!inventoryCheck.available) {
+          const errorMsg = inventoryCheck.error || 'Insufficient stock';
+          const availableQty = inventoryCheck.quantity ?? 0;
+          
+          if (availableQty > 0) {
+            toast.error(`${errorMsg}. Only ${availableQty} available.`);
+          } else {
+            toast.error(`${errorMsg}. This item is out of stock.`);
+          }
+          return; // Don't add item if insufficient stock
+        }
+
         const { items } = get();
         const existingItem = items.find(i => i.variantId === item.variantId);
+        
+        // Calculate new total quantity if item already exists
+        const newQuantity = existingItem 
+          ? existingItem.quantity + item.quantity 
+          : item.quantity;
+        
+        // Check inventory again with new total quantity
+        const totalInventoryCheck = await checkInventory(item.variantId, newQuantity);
+        if (!totalInventoryCheck.available) {
+          const errorMsg = totalInventoryCheck.error || 'Insufficient stock';
+          const availableQty = totalInventoryCheck.quantity ?? 0;
+          toast.error(`Cannot add more. ${errorMsg}. Only ${availableQty} available.`);
+          return;
+        }
         
         let updatedItems: CartItem[];
         if (existingItem) {
           updatedItems = items.map(i =>
               i.variantId === item.variantId
-                ? { ...i, quantity: i.quantity + item.quantity }
+                ? { ...i, quantity: newQuantity }
                 : i
           );
         } else {
@@ -90,6 +121,27 @@ export const useCartStore = create<CartStore>()(
       updateQuantity: async (variantId, quantity) => {
         if (quantity <= 0) {
           get().removeItem(variantId);
+          return;
+        }
+        
+        // Check inventory before updating quantity
+        const inventoryCheck = await checkInventory(variantId, quantity);
+        
+        if (!inventoryCheck.available) {
+          const errorMsg = inventoryCheck.error || 'Insufficient stock';
+          const availableQty = inventoryCheck.quantity ?? 0;
+          
+          if (availableQty > 0) {
+            toast.error(`${errorMsg}. Only ${availableQty} available.`);
+            // Set quantity to available quantity
+            const updatedItems = get().items.map(item =>
+                item.variantId === variantId ? { ...item, quantity: availableQty } : item
+            );
+            set({ items: updatedItems });
+          } else {
+            toast.error(`${errorMsg}. This item is out of stock.`);
+            get().removeItem(variantId);
+          }
           return;
         }
         

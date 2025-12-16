@@ -10,7 +10,7 @@ export default function PartyWear() {
       <Navigation />
       <HeroBanner imageUrl={heroImage1} />
       <div id="products" className="container mx-auto px-4 py-16 flex-grow">
-        <ProductGrid />
+        <ProductGrid category="Party Wear" limit={50} />
       </div>
       <Footer />
     </div>

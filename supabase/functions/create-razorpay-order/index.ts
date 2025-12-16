@@ -100,6 +100,37 @@ serve(async (req) => {
 
     const zwitchPayment = await tokenResponse.json();
     
+    // Validate inventory before creating order
+    const inventoryErrors: string[] = [];
+    for (const item of items) {
+      if (item.variantId) {
+        const { data: inventoryCheck, error: checkError } = await supabase
+          .rpc('check_inventory_availability', {
+            p_variant_id: item.variantId,
+            p_requested_quantity: item.quantity,
+          });
+
+        if (checkError || !inventoryCheck?.available) {
+          inventoryErrors.push(
+            `${item.title || 'Item'}: ${inventoryCheck?.error || 'Stock unavailable'}`
+          );
+        }
+      }
+    }
+
+    if (inventoryErrors.length > 0) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Insufficient stock',
+          details: inventoryErrors 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     // Create order in database
     const { data: dbOrder, error: dbError } = await supabase
       .from('orders')
@@ -138,6 +169,26 @@ serve(async (req) => {
     if (dbError) {
       console.error('Database error:', dbError);
       throw new Error('Failed to create order in database');
+    }
+
+    // Create order line items for inventory tracking
+    const orderLineItems = items.map((item: any) => ({
+      order_id: dbOrder.id,
+      product_id: item.id || null,
+      variant_id: item.variantId || null,
+      quantity: item.quantity,
+      price: parseFloat(item.price) || 0,
+      title: item.title || 'Product',
+      variant_title: item.variantTitle || null,
+    }));
+
+    const { error: lineItemsError } = await supabase
+      .from('order_line_items')
+      .insert(orderLineItems);
+
+    if (lineItemsError) {
+      console.error('Error creating order line items:', lineItemsError);
+      // Don't fail the order creation, but log the error
     }
 
     // Record coupon usage if coupon was applied

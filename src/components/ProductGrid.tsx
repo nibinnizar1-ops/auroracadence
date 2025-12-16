@@ -3,13 +3,18 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { ShoppingCart, Heart } from "lucide-react";
-import { getProducts, ShopifyProduct } from "@/lib/products";
+import { getProducts, getProductsByCategory, ShopifyProduct } from "@/lib/products";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-export const ProductGrid = () => {
+interface ProductGridProps {
+  category?: string; // Category name to filter products
+  limit?: number; // Maximum number of products to show
+}
+
+export const ProductGrid = ({ category, limit = 20 }: ProductGridProps = {}) => {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ShopifyProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +24,14 @@ export const ProductGrid = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await getProducts(20);
+        let data: ShopifyProduct[];
+        if (category) {
+          // Fetch products filtered by category
+          data = await getProductsByCategory(category, limit);
+        } else {
+          // Fetch all products (for homepage, search, etc.)
+          data = await getProducts(limit);
+        }
         setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -29,7 +41,7 @@ export const ProductGrid = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [category, limit]);
 
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
   const filteredProducts = searchQuery 

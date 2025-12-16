@@ -66,6 +66,22 @@ serve(async (req) => {
       throw new Error('Failed to update order status');
     }
 
+    // Deduct inventory now that payment is confirmed
+    const { data: deductResult, error: deductError } = await supabase
+      .rpc('deduct_order_inventory', {
+        p_order_id: dbOrderId,
+      });
+
+    if (deductError) {
+      console.error('Error deducting inventory:', deductError);
+      // Log error but don't fail payment verification
+      // Inventory can be manually adjusted if needed
+    } else if (deductResult && !(deductResult as any).success) {
+      console.warn('Inventory deduction had issues:', deductResult);
+    } else {
+      console.log('Inventory deducted successfully for order:', dbOrderId);
+    }
+
     console.log('Payment verified successfully for order:', dbOrderId);
 
     return new Response(

@@ -1,22 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
+import { getActiveLuxuryMoodCategories } from "@/lib/luxury-moods";
 import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
 import heroJewelry2 from "@/assets/hero-jewelry-2.jpg";
 import heroJewelry3 from "@/assets/hero-jewelry-3.jpg";
 
-const categories = [
-  { name: "Office Wear", description: "Professional & Elegant", image: heroJewelry1, href: "/office-wear" },
-  { name: "Daily Wear", description: "Comfortable & Chic", image: heroJewelry2, href: "/daily-wear" },
-  { name: "Party Wear", description: "Bold & Glamorous", image: heroJewelry3, href: "/party-wear" },
-  { name: "Date Night", description: "Romantic & Sophisticated", image: heroJewelry1, href: "/date-night" },
-  { name: "Wedding Wear", description: "Timeless & Luxurious", image: heroJewelry2, href: "/wedding-wear" },
+const defaultCategories = [
+  { name: "Office Wear", description: "Professional & Elegant", image_url: heroJewelry1, href: "/office-wear" },
+  { name: "Daily Wear", description: "Comfortable & Chic", image_url: heroJewelry2, href: "/daily-wear" },
+  { name: "Party Wear", description: "Bold & Glamorous", image_url: heroJewelry3, href: "/party-wear" },
+  { name: "Date Night", description: "Romantic & Sophisticated", image_url: heroJewelry1, href: "/date-night" },
+  { name: "Wedding Wear", description: "Timeless & Luxurious", image_url: heroJewelry2, href: "/wedding-wear" },
 ];
 
 export const CategorySection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [categories, setCategories] = useState(defaultCategories);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const data = await getActiveLuxuryMoodCategories();
+      // Merge database items with defaults - use database image if exists, otherwise use default
+      const mergedCategories = defaultCategories.map(defaultCat => {
+        const dbItem = data.find(item => item.name === defaultCat.name);
+        return {
+          name: defaultCat.name,
+          description: dbItem?.description || defaultCat.description,
+          image_url: dbItem?.image_url || defaultCat.image_url,
+          href: dbItem?.href || defaultCat.href,
+        };
+      });
+      setCategories(mergedCategories);
+    };
+    loadCategories();
+  }, []);
 
   const updateCarousel = (newIndex: number) => {
     setCurrentIndex((newIndex + categories.length) % categories.length);
@@ -130,7 +150,7 @@ export const CategorySection = () => {
                   }}
                 >
                   <img
-                    src={category.image}
+                    src={category.image_url}
                     alt={category.name}
                     className="w-full h-full object-cover"
                     style={{

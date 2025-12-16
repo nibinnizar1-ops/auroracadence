@@ -10,7 +10,7 @@ export default function DailyWear() {
       <Navigation />
       <HeroBanner imageUrl={heroImage2} />
       <div id="products" className="container mx-auto px-4 py-16 flex-grow">
-        <ProductGrid />
+        <ProductGrid category="Daily Wear" limit={50} />
       </div>
       <Footer />
     </div>

@@ -1,126 +1,233 @@
 # Step-by-Step Migration Guide
 
-## 🎯 What You Need to Do
+## 🎯 Overview
 
-You need to copy each migration SQL file and run it in the Supabase SQL Editor. Follow these steps:
+You need to apply **8 migrations** to Supabase. Each migration takes about 10-30 seconds.
 
----
-
-## 📝 Step 1: Open the First Migration File
-
-1. In your code editor (VS Code/Cursor), open:
-   ```
-   supabase/migrations/20250101000001_create_coupons_tables.sql
-   ```
-
-2. **Select ALL** the content (Ctrl+A or Cmd+A)
-3. **Copy** it (Ctrl+C or Cmd+C)
+**Total Time**: ~5-10 minutes
 
 ---
 
-## 📝 Step 2: Paste into Supabase SQL Editor
+## 📋 Prerequisites
 
-1. Go back to your Supabase Dashboard (the SQL Editor you have open)
-2. Click in the large white text area (where it says "Hit CMD+K to generate query...")
-3. **Paste** the SQL code (Ctrl+V or Cmd+V)
-4. You should see the SQL code appear in the editor
-
----
-
-## 📝 Step 3: Run the Migration
-
-1. Click the green **"Run"** button (top right, or press Ctrl+Enter / Cmd+Enter)
-2. Wait for it to complete
-3. You should see a success message like "Success. No rows returned" or similar
-4. If you see errors, let me know!
+- ✅ You're logged into Supabase Dashboard
+- ✅ You have access to SQL Editor
+- ✅ You have at least one admin user in `admin_users` table
 
 ---
 
-## 📝 Step 4: Repeat for Each Migration
+## 🚀 Step-by-Step Instructions
 
-Do the same for each migration file **in this exact order**:
+### Step 1: Open Supabase SQL Editor
 
-1. ✅ **First**: `20250101000001_create_coupons_tables.sql`
-2. ✅ **Second**: `20250101000002_create_products_tables.sql`
-3. ✅ **Third**: `20250101000003_create_collections_tables.sql`
-4. ✅ **Fourth**: `20250101000004_create_categories_tables.sql`
-5. ✅ **Fifth**: `20250101000005_create_order_line_items.sql`
-
-**Important**: Run them one at a time, in order!
+1. Go to [https://app.supabase.com](https://app.supabase.com)
+2. Select your project: **Aurora-Tes**
+3. In the **left sidebar**, click **"SQL Editor"**
+4. You should see a blank SQL editor window
 
 ---
 
-## 🎯 Quick Visual Guide
+### Step 2: Apply Migration #1 - Product Discount Fields
 
+1. **Open the file**: `supabase/migrations/20250113000001_add_product_discount_fields.sql`
+2. **Select ALL** contents (Ctrl+A / Cmd+A)
+3. **Copy** (Ctrl+C / Cmd+C)
+4. **Go back to Supabase SQL Editor**
+5. **Paste** into the editor (Ctrl+V / Cmd+V)
+6. **Click "Run"** button (or press Ctrl+Enter / Cmd+Enter)
+7. **Wait for success message** (should say "Success. No rows returned" or similar)
+8. ✅ **Migration #1 Complete!**
+
+---
+
+### Step 3: Apply Migration #2 - Banners Table
+
+1. **Click "New Query"** button in SQL Editor (or clear the editor)
+2. **Open the file**: `supabase/migrations/20250113000002_create_banners_table.sql`
+3. **Select ALL** contents and **Copy**
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success message**
+7. ✅ **Migration #2 Complete!**
+
+---
+
+### Step 4: Apply Migration #3 - Category Showcase
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000003_create_category_showcase.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #3 Complete!**
+
+---
+
+### Step 5: Apply Migration #4 - Luxury Moods
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000004_create_luxury_moods.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #4 Complete!**
+
+---
+
+### Step 6: Apply Migration #5 - Gift Guide
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000005_create_gift_guide.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #5 Complete!**
+
+---
+
+### Step 7: Apply Migration #6 - Influencer Showcase
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000006_create_influencer_showcase.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #6 Complete!**
+
+---
+
+### Step 8: Apply Migration #7 - Store Locations
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000007_create_store_locations.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #7 Complete!**
+
+---
+
+### Step 9: Apply Migration #8 - Social Media Links
+
+1. **Click "New Query"** (or clear editor)
+2. **Open**: `supabase/migrations/20250113000008_create_social_media_links.sql`
+3. **Copy ALL** contents
+4. **Paste** into SQL Editor
+5. **Click "Run"**
+6. **Wait for success**
+7. ✅ **Migration #8 Complete!**
+
+---
+
+## ✅ Verification Steps
+
+After applying all migrations, verify they worked:
+
+### Option 1: Check Tables in Dashboard
+
+1. Go to **Table Editor** in left sidebar
+2. You should see these **new tables**:
+   - ✅ `banners`
+   - ✅ `category_showcase_items`
+   - ✅ `luxury_mood_categories`
+   - ✅ `gift_guide_items`
+   - ✅ `influencer_showcase_items`
+   - ✅ `store_locations`
+   - ✅ `social_media_links`
+
+3. Check `products` table - it should have new columns:
+   - `discount_type`
+   - `discount_value`
+   - `discount_valid_from`
+   - `discount_valid_until`
+   - `eligible_for_coupons`
+
+### Option 2: Run Verification Query
+
+In SQL Editor, run:
+
+```sql
+-- Check if all tables exist
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public' 
+AND table_name IN (
+  'banners',
+  'category_showcase_items',
+  'luxury_mood_categories',
+  'gift_guide_items',
+  'influencer_showcase_items',
+  'store_locations',
+  'social_media_links'
+)
+ORDER BY table_name;
 ```
-1. Open migration file in your code editor
-   ↓
-2. Select All (Ctrl+A / Cmd+A)
-   ↓
-3. Copy (Ctrl+C / Cmd+C)
-   ↓
-4. Go to Supabase SQL Editor
-   ↓
-5. Paste (Ctrl+V / Cmd+V)
-   ↓
-6. Click "Run" button
-   ↓
-7. Wait for success
-   ↓
-8. Repeat for next migration
+
+You should see **7 rows** returned.
+
+---
+
+## 🎉 Success!
+
+If all migrations completed successfully, you're done! 
+
+**Next Steps:**
+1. Go to `/admin` in your app
+2. You should see all new media management sections
+3. Start adding content!
+
+---
+
+## ⚠️ Troubleshooting
+
+### Error: "relation already exists"
+- **Meaning**: Table already created
+- **Solution**: Skip that migration, it's already done
+
+### Error: "column already exists"
+- **Meaning**: Column already added
+- **Solution**: Skip that migration, it's already done
+
+### Error: "function does not exist: is_admin"
+- **Meaning**: Admin function not found
+- **Solution**: Make sure you ran `20250101000010_create_admin_users_table.sql` first
+
+### Error: "permission denied"
+- **Meaning**: You don't have permission
+- **Solution**: Make sure you're logged in as project owner/admin
+
+---
+
+## 📝 Quick Reference
+
+**Migration Order:**
+1. Product Discount Fields
+2. Banners Table
+3. Category Showcase
+4. Luxury Moods
+5. Gift Guide
+6. Influencer Showcase
+7. Store Locations
+8. Social Media Links
+
+**Files Location:**
+```
+supabase/migrations/
+├── 20250113000001_add_product_discount_fields.sql
+├── 20250113000002_create_banners_table.sql
+├── 20250113000003_create_category_showcase.sql
+├── 20250113000004_create_luxury_moods.sql
+├── 20250113000005_create_gift_guide.sql
+├── 20250113000006_create_influencer_showcase.sql
+├── 20250113000007_create_store_locations.sql
+└── 20250113000008_create_social_media_links.sql
 ```
 
 ---
 
-## ✅ How to Verify It Worked
-
-After running all migrations:
-
-1. In Supabase Dashboard, click **"Table Editor"** in the left sidebar
-2. You should see all these new tables:
-   - ✅ coupons
-   - ✅ coupon_usage
-   - ✅ products
-   - ✅ product_variants
-   - ✅ product_images
-   - ✅ product_options
-   - ✅ collections
-   - ✅ collection_products
-   - ✅ categories
-   - ✅ category_products
-   - ✅ order_line_items
-
-3. Click on the **"orders"** table
-4. Check that it has these new columns:
-   - ✅ coupon_id
-   - ✅ discount_amount
-   - ✅ user_id
-
----
-
-## 🆘 If You Get Errors
-
-**Common Issues:**
-
-1. **"relation already exists"** - The table already exists, that's okay! Skip that migration or drop the table first.
-
-2. **"permission denied"** - Make sure you're running as the project owner/admin.
-
-3. **"syntax error"** - Check that you copied the entire SQL correctly (no missing parts).
-
-4. **"function does not exist"** - Make sure you ran the migrations in order (the first one creates functions used by later ones).
-
-**If you see any errors, copy the error message and let me know!**
-
----
-
-## 💡 Pro Tip
-
-After pasting each migration, you can:
-- Click the **"Save"** button to save the query for later
-- Give it a name like "Create Coupons Tables" for easy reference
-
----
-
-**Start with the first migration file and let me know when you're done or if you need help!**
-
+**Ready to start? Begin with Step 1!** 🚀

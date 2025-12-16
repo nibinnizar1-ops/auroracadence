@@ -19,6 +19,8 @@ import { Footer } from "@/components/Footer";
 declare global {
   interface Window {
     Layer: any;
+    Razorpay: any;
+    Cashfree: any;
   }
 }
 
@@ -149,16 +151,6 @@ export default function Checkout() {
     });
   };
 
-  const loadZwitchScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://payments.open.money/layer";
-      script.id = "context";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,15 +190,59 @@ export default function Checkout() {
     }
 
     try {
-      // Load Zwitch script
-      const scriptLoaded = await loadZwitchScript();
-      if (!scriptLoaded) {
-        throw new Error("Failed to load Zwitch SDK");
+      // Validate inventory before proceeding to payment
+      const { checkInventory } = await import('@/lib/inventory');
+      const inventoryChecks = await Promise.all(
+        items.map(async (item) => ({
+          item,
+          check: await checkInventory(item.variantId, item.quantity),
+        }))
+      );
+
+      const inventoryErrors = inventoryChecks
+        .filter(({ check }) => !check.available)
+        .map(({ item, check }) => ({
+          product: item.product.node.title,
+          error: check.error || 'Insufficient stock',
+          available: check.quantity ?? 0,
+        }));
+
+      if (inventoryErrors.length > 0) {
+        const errorMessages = inventoryErrors.map(
+          (err) => `${err.product}: ${err.error}${err.available > 0 ? ` (Only ${err.available} available)` : ''}`
+        );
+        toast.error('Some items are out of stock:\n' + errorMessages.join('\n'));
+        setIsLoading(false);
+        return;
       }
+
+      // Get active gateway and load SDK
+      const { getActiveGatewayInfo, loadGatewaySDK } = await import('@/lib/gateway-sdk-loader');
+      const gatewayInfo = await getActiveGatewayInfo();
+      
+      if (!gatewayInfo) {
+        console.error("No active gateway found. Check admin panel → Payments → Gateways");
+        toast.error("No active payment gateway configured. Please configure and activate a gateway in admin panel.");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Active gateway:", gatewayInfo);
+
+      // Load gateway SDK
+      const scriptLoaded = await loadGatewaySDK(gatewayInfo.sdkUrl);
+      if (!scriptLoaded) {
+        console.error(`Failed to load ${gatewayInfo.gatewayName} SDK from: ${gatewayInfo.sdkUrl}`);
+        toast.error(`Failed to load ${gatewayInfo.gatewayName} payment SDK. Please check your internet connection.`);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Creating payment order...");
 
       // Create payment token in backend
       const { data: orderData, error: orderError } = await supabase.functions.invoke(
-        "create-razorpay-order",
+        "create-payment-order",
         {
           body: {
             amount: Math.round(totalPrice * 100), // Convert to paise
@@ -216,6 +252,7 @@ export default function Checkout() {
             items: items.map(item => ({
               id: item.product.node.id,
               title: item.product.node.title,
+              variantId: item.variantId, // Include variant ID for inventory tracking
               variantTitle: item.variantTitle,
               price: item.price.amount,
               quantity: item.quantity,
@@ -225,33 +262,102 @@ export default function Checkout() {
         }
       );
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Edge Function error:", orderError);
+        const errorMessage = orderError.message || JSON.stringify(orderError);
+        toast.error(`Payment error: ${errorMessage}`);
+        setIsLoading(false);
+        return;
+      }
 
-      console.log('Opening Zwitch payment with token:', orderData.paymentToken);
+      if (!orderData) {
+        console.error("No order data returned from Edge Function");
+        toast.error("Failed to create payment order. Please try again.");
+        setIsLoading(false);
+        return;
+      }
 
-      // Open Zwitch Layer payment page
-      window.Layer.checkout(
-        {
-          token: orderData.paymentToken,
-          accesskey: orderData.accessKey,
-          theme: {
-            color: "#3d9080",
-            error_color: "#ff2b2b",
+      console.log(`Opening ${gatewayInfo.gatewayName} payment:`, orderData);
+
+      // Handle payment based on gateway type
+      if (gatewayInfo.gatewayCode === "zwitch") {
+        // Zwitch uses Layer.js SDK
+        if (!window.Layer) {
+          throw new Error("Zwitch SDK not loaded");
+        }
+
+        window.Layer.checkout(
+          {
+            token: orderData.paymentToken,
+            accesskey: orderData.accessKey,
+            theme: {
+              color: "#3d9080",
+              error_color: "#ff2b2b",
+            }
+          },
+          async function(response: any) {
+            console.log('Payment response:', response);
+            
+            if (response.status === "captured") {
+              try {
+                // Verify payment
+                const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
+                  "verify-payment",
+                  {
+                    body: {
+                      payment_token_id: response.payment_token_id,
+                      payment_id: response.payment_id,
+                      status: response.status,
+                      dbOrderId: orderData.dbOrderId,
+                      order_id: orderData.paymentToken,
+                    },
+                  }
+                );
+
+                if (verifyError) throw verifyError;
+
+                toast.success("Payment successful!");
+                clearCart();
+                navigate("/");
+              } catch (error) {
+                console.error("Payment verification failed:", error);
+                toast.error("Payment verification failed");
+              }
+            } else if (response.status === "failed") {
+              toast.error("Payment failed. Please try again.");
+            } else if (response.status === "cancelled") {
+              toast.error("Payment cancelled.");
+            }
+          },
+          function(err: any) {
+            console.error("Payment gateway error:", err);
+            toast.error("Payment gateway error: " + (err.message || "Unknown error"));
           }
-        },
-        async function(response: any) {
-          console.log('Zwitch payment response:', response);
-          
-          if (response.status === "captured") {
+        );
+      } else if (gatewayInfo.gatewayCode === "razorpay") {
+        // Razorpay uses Razorpay Checkout
+        const Razorpay = (window as any).Razorpay;
+        if (!Razorpay) {
+          throw new Error("Razorpay SDK not loaded");
+        }
+
+        const options = {
+          key: orderData.accessKey,
+          amount: Math.round(totalPrice * 100), // Amount in paise
+          currency: currency || "INR",
+          name: "Aurora Cadence",
+          description: "Order Payment",
+          order_id: orderData.paymentToken,
+          handler: async function(response: any) {
             try {
               // Verify payment
               const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
-                "verify-razorpay-payment",
+                "verify-payment",
                 {
                   body: {
-                    payment_token_id: response.payment_token_id,
-                    payment_id: response.payment_id,
-                    status: response.status,
+                    payment_id: response.razorpay_payment_id,
+                    order_id: response.razorpay_order_id,
+                    status: "captured",
                     dbOrderId: orderData.dbOrderId,
                   },
                 }
@@ -266,21 +372,31 @@ export default function Checkout() {
               console.error("Payment verification failed:", error);
               toast.error("Payment verification failed");
             }
-          } else if (response.status === "failed") {
-            toast.error("Payment failed. Please try again.");
-          } else if (response.status === "cancelled") {
-            toast.error("Payment cancelled.");
-          }
-        },
-        function(err: any) {
-          console.error("Zwitch integration error:", err);
-          toast.error("Payment gateway error: " + (err.message || "Unknown error"));
-        }
-      );
+          },
+          prefill: {
+            name: formData.name,
+            email: formData.email,
+            contact: formData.phone,
+          },
+          theme: {
+            color: "#3d9080",
+          },
+        };
+
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+      } else if (orderData.redirectUrl) {
+        // PayU and Cashfree use redirect-based flow
+        // Redirect to payment page
+        window.location.href = orderData.redirectUrl;
+      } else {
+        throw new Error(`Unsupported payment gateway: ${gatewayInfo.gatewayCode}`);
+      }
     } catch (error) {
       console.error("Checkout error:", error);
-      toast.error("Failed to initiate payment");
-    } finally {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Full error details:", error);
+      toast.error(`Failed to initiate payment: ${errorMessage}`);
       setIsLoading(false);
     }
   };

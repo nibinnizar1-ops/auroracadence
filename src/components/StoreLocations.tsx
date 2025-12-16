@@ -1,39 +1,61 @@
 import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getActiveStoreLocations } from "@/lib/stores";
 import bannerCollection from "@/assets/banner-collection.jpg";
 import bannerLuxury from "@/assets/banner-luxury.jpg";
 import heroJewelry1 from "@/assets/hero-jewelry-1.jpg";
 import heroJewelry2 from "@/assets/hero-jewelry-2.jpg";
 
-const stores = [
+const defaultStores = [
   {
     name: "He & She",
     location: "Madannada, Kollam",
     description: "A warm, curated space where everyday elegance meets effortless style.",
-    image: bannerCollection,
+    image_url: bannerCollection,
   },
   {
     name: "Salon de R",
     location: "Polayathode, Kollam",
     description: "A boutique experience blending fashion, beauty and contemporary jewellery.",
-    image: bannerLuxury,
+    image_url: bannerLuxury,
   },
   {
     name: "Rock Paper",
     location: "Polayathode, Kollam",
     description: "Youthful, modern and expressive — perfect for trend-led, stylish finds.",
-    image: heroJewelry1,
+    image_url: heroJewelry1,
   },
   {
     name: "Go Girl",
     location: "Trivandrum / Kollam",
     description: "A chic destination crafted for women who love sparkle, confidence and self-expression.",
-    image: heroJewelry2,
+    image_url: heroJewelry2,
   },
 ];
 
 export const StoreLocations = () => {
   const [isScrolling, setIsScrolling] = useState(false);
+  const [stores, setStores] = useState(defaultStores);
+
+  useEffect(() => {
+    const loadStores = async () => {
+      const data = await getActiveStoreLocations();
+      // Merge database items with defaults - use database image if exists, otherwise use default
+      const mergedStores = defaultStores.map((defaultStore, index) => {
+        // Try to find by name first, then by position
+        const dbItem = data.find(item => item.name === defaultStore.name) ||
+                      data.find(item => item.position === index);
+        return {
+          name: dbItem?.name || defaultStore.name,
+          location: dbItem?.location || defaultStore.location,
+          description: dbItem?.description || defaultStore.description,
+          image_url: dbItem?.image_url || defaultStore.image_url,
+        };
+      });
+      setStores(mergedStores);
+    };
+    loadStores();
+  }, []);
 
   useEffect(() => {
     let scrollTimeout: NodeJS.Timeout;
@@ -69,7 +91,7 @@ export const StoreLocations = () => {
                 {/* Front of card */}
                 <div className="store-card-front">
                   <img 
-                    src={store.image} 
+                    src={store.image_url} 
                     alt={store.name}
                     className="absolute inset-0 w-full h-full object-cover"
                   />

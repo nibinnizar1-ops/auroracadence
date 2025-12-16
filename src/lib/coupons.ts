@@ -187,3 +187,35 @@ export async function getAvailableCoupons(): Promise<AvailableCoupon[]> {
   }
 }
 
+/**
+ * Fetch coupon by ID
+ * @param couponId - Coupon ID
+ * @returns Coupon details or null
+ */
+export async function getCouponById(couponId: string): Promise<{
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  discount_type: 'percentage' | 'fixed_amount';
+  discount_value: number;
+  valid_until: string;
+} | null> {
+  try {
+    const { data: coupon, error } = await supabase
+      .from('coupons')
+      .select('id, code, name, description, discount_type, discount_value, valid_until')
+      .eq('id', couponId)
+      .single();
+
+    if (error || !coupon) {
+      return null;
+    }
+
+    return coupon;
+  } catch (error) {
+    console.error('Error fetching coupon by ID:', error);
+    return null;
+  }
+}
+

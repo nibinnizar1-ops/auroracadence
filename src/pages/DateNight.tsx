@@ -10,7 +10,7 @@ export default function DateNight() {
       <Navigation />
       <HeroBanner imageUrl={heroImage2} />
       <div id="products" className="container mx-auto px-4 py-16 flex-grow">
-        <ProductGrid />
+        <ProductGrid category="Date Night" limit={50} />
       </div>
       <Footer />
     </div>
