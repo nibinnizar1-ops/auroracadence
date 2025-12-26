@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { CartDrawer } from "./CartDrawer";
 import { LoginDialog } from "./LoginDialog";
 import { SignupDialog } from "./SignupDialog";
+import { ProfileDropdown } from "./ProfileDropdown";
 import { useState } from "react";
 
 export const Navigation = () => {
@@ -44,9 +45,9 @@ export const Navigation = () => {
       {/* Top row: Logo, Search, Icons */}
       <div className="border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-8">
+          <div className="flex items-center gap-4 md:gap-8">
             {/* Logo */}
-            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <Link to="/" className="flex items-center hover:opacity-80 transition-opacity flex-shrink-0">
               <img 
                 src="/AURORA_CADENCE_Black_Text.png" 
                 alt="AURORA CADENCE" 
@@ -68,16 +69,9 @@ export const Navigation = () => {
               </div>
             </form>
 
-            {/* Icons */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative text-foreground hover:bg-secondary"
-                onClick={() => isAuthenticated ? navigate("/profile") : setLoginOpen(true)}
-              >
-                <User className="h-5 w-5" />
-              </Button>
+            {/* Icons - Right aligned */}
+            <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+              <CartDrawer />
               
               <Button 
                 variant="ghost" 
@@ -93,7 +87,18 @@ export const Navigation = () => {
                 )}
               </Button>
               
-              <CartDrawer />
+              {isAuthenticated ? (
+                <ProfileDropdown />
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="relative text-foreground hover:bg-secondary"
+                  onClick={() => setLoginOpen(true)}
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -9,64 +9,98 @@ export default function AuthCallback() {
   const syncSession = useAuthStore((state) => state.syncSession);
 
   useEffect(() => {
+    let isMounted = true;
+    let redirectTimer: number | null = null;
+
     const handleAuthCallback = async () => {
       try {
-        // Handle the OAuth callback - Supabase handles the hash fragments automatically
-        // But we need to wait for the session to be established
+        // Check for error in URL hash first
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get('error');
+        const errorDescription = hashParams.get('error_description');
+
+        if (error) {
+          console.error("OAuth error:", error, errorDescription);
+          toast.error(`Authentication failed: ${errorDescription || error}`);
+          if (isMounted) {
+            redirectTimer = window.setTimeout(() => navigate("/"), 2000);
+          }
+          return;
+        }
+
+        // Wait a moment for Supabase to process the OAuth callback
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Get the session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
           console.error("Auth callback error:", sessionError);
           toast.error(`Authentication failed: ${sessionError.message}`);
-          navigate("/");
+          if (isMounted) {
+            redirectTimer = window.setTimeout(() => navigate("/"), 2000);
+          }
           return;
         }
 
         if (session?.user) {
           // Sync the session with the auth store
           await syncSession();
-          toast.success("Successfully signed in!");
-          navigate("/");
-        } else {
-          // Try to get the session from URL hash if it exists
-          const hashParams = new URLSearchParams(window.location.hash.substring(1));
-          const accessToken = hashParams.get('access_token');
-          const error = hashParams.get('error');
-          const errorDescription = hashParams.get('error_description');
-
-          if (error) {
-            console.error("OAuth error:", error, errorDescription);
-            toast.error(`Authentication failed: ${errorDescription || error}`);
-            navigate("/");
-            return;
+          
+          // Clear any existing redirect timers
+          if (redirectTimer) {
+            clearTimeout(redirectTimer);
           }
-
+          
+          // Only navigate if component is still mounted
+          if (isMounted) {
+            toast.success("Successfully signed in!");
+            // Use replace instead of navigate to prevent back button issues
+            navigate("/", { replace: true });
+          }
+        } else {
+          // No session found - might need to wait a bit more
+          const accessToken = hashParams.get('access_token');
           if (accessToken) {
-            // Session should be set automatically by Supabase, wait a bit and retry
+            // Wait a bit more for Supabase to process
             setTimeout(async () => {
+              if (!isMounted) return;
+              
               const { data: { session: retrySession } } = await supabase.auth.getSession();
               if (retrySession?.user) {
                 await syncSession();
                 toast.success("Successfully signed in!");
-                navigate("/");
+                navigate("/", { replace: true });
               } else {
                 toast.error("No session found. Please try again.");
-                navigate("/");
+                navigate("/", { replace: true });
               }
-            }, 500);
+            }, 1000);
           } else {
             toast.error("No session found. Please try again.");
-            navigate("/");
+            if (isMounted) {
+              navigate("/", { replace: true });
+            }
           }
         }
       } catch (error: any) {
         console.error("Unexpected error during auth callback:", error);
         toast.error(`An unexpected error occurred: ${error.message || "Please try again."}`);
-        navigate("/");
+        if (isMounted) {
+          navigate("/", { replace: true });
+        }
       }
     };
 
     handleAuthCallback();
+
+    // Cleanup function to prevent memory leaks and multiple navigations
+    return () => {
+      isMounted = false;
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+      }
+    };
   }, [navigate, syncSession]);
 
   return (

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -20,32 +18,8 @@ interface SignupDialogProps {
 }
 
 export const SignupDialog = ({ open, onOpenChange, onSwitchToLogin }: SignupDialogProps) => {
-  const signup = useAuthStore(state => state.signup);
   const signInWithGoogle = useAuthStore(state => state.signInWithGoogle);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const success = await signup(phone, password, name);
-    
-    setIsLoading(false);
-    
-    if (success) {
-      toast.success("Account created successfully!");
-      onOpenChange(false);
-      setName("");
-      setPhone("");
-      setPassword("");
-    } else {
-      toast.error("Mobile number already exists");
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -63,67 +37,14 @@ export const SignupDialog = ({ open, onOpenChange, onSwitchToLogin }: SignupDial
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Sign Up</DialogTitle>
-          <DialogDescription>Create a new account to get started</DialogDescription>
+          <DialogDescription>Create a new account to get started with Google</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Mobile Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+1 (555) 000-0000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Sign Up"}
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
+        <div className="space-y-4">
           <Button
             type="button"
-            variant="outline"
             className="w-full"
             onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || isLoading}
+            disabled={isGoogleLoading}
           >
             <Chrome className="mr-2 h-4 w-4" />
             {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
@@ -142,7 +63,7 @@ export const SignupDialog = ({ open, onOpenChange, onSwitchToLogin }: SignupDial
               Login
             </button>
           </p>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
