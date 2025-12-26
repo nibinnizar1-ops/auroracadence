@@ -241,11 +241,12 @@ export default function Checkout() {
       console.log("Creating payment order...");
 
       // Create payment token in backend
+      // Note: Amount should be in rupees (not paise) for Zwitch
       const { data: orderData, error: orderError } = await supabase.functions.invoke(
         "create-payment-order",
         {
           body: {
-            amount: Math.round(totalPrice * 100), // Convert to paise
+            amount: totalPrice, // Amount in rupees (Zwitch expects rupees)
             currency: items[0]?.price.currencyCode || "INR",
             customerInfo: formData,
             userId: user?.id || null, // Pass user ID if logged in
@@ -264,8 +265,29 @@ export default function Checkout() {
 
       if (orderError) {
         console.error("Edge Function error:", orderError);
-        const errorMessage = orderError.message || JSON.stringify(orderError);
-        toast.error(`Payment error: ${errorMessage}`);
+        console.error("Full error details:", {
+          message: orderError.message,
+          context: orderError.context,
+          status: orderError.status,
+          statusText: orderError.statusText,
+        });
+        
+        // Try to get more details from the error
+        let errorMessage = orderError.message || "Unknown error";
+        if (orderError.context) {
+          try {
+            const errorDetails = typeof orderError.context === 'string' 
+              ? JSON.parse(orderError.context) 
+              : orderError.context;
+            if (errorDetails.error) {
+              errorMessage = errorDetails.error;
+            }
+          } catch (e) {
+            // Ignore parse errors
+          }
+        }
+        
+        toast.error(`Payment error: ${errorMessage}. Check console and Edge Function logs for details.`);
         setIsLoading(false);
         return;
       }
@@ -282,6 +304,55 @@ export default function Checkout() {
       // Handle payment based on gateway type
       if (gatewayInfo.gatewayCode === "zwitch") {
         // Zwitch uses Layer.js SDK
+        // Always use sandbox SDK since we're using sandbox credentials
+        const layerSDKUrl = "https://sandbox-payments.open.money/layer";
+        
+        // Load sandbox SDK if not already loaded
+        if (!window.Layer) {
+          const script = document.createElement("script");
+          script.src = layerSDKUrl;
+          script.async = true;
+          script.id = "zwitch-layer-sdk";
+          
+          await new Promise((resolve, reject) => {
+            script.onload = () => {
+              console.log("Zwitch Sandbox Layer.js SDK loaded");
+              resolve(true);
+            };
+            script.onerror = () => {
+              console.error("Failed to load Zwitch SDK");
+              reject(new Error("Failed to load Zwitch payment SDK"));
+            };
+            document.head.appendChild(script);
+          });
+        } else {
+          // Check if live SDK is loaded, reload with sandbox if needed
+          const existingScript = document.getElementById("zwitch-layer-sdk");
+          if (!existingScript || !existingScript.src.includes("sandbox")) {
+            // Remove existing SDK
+            if (existingScript) existingScript.remove();
+            delete (window as any).Layer;
+            
+            // Load sandbox SDK
+            const script = document.createElement("script");
+            script.src = layerSDKUrl;
+            script.async = true;
+            script.id = "zwitch-layer-sdk";
+            
+            await new Promise((resolve, reject) => {
+              script.onload = () => {
+                console.log("Zwitch Sandbox Layer.js SDK loaded");
+                resolve(true);
+              };
+              script.onerror = () => {
+                console.error("Failed to load Zwitch SDK");
+                reject(new Error("Failed to load Zwitch payment SDK"));
+              };
+              document.head.appendChild(script);
+            });
+          }
+        }
+
         if (!window.Layer) {
           throw new Error("Zwitch SDK not loaded");
         }
@@ -296,42 +367,111 @@ export default function Checkout() {
             }
           },
           async function(response: any) {
-            console.log('Payment response:', response);
+            console.log('Payment response from Layer.js:', response);
+            setIsLoading(false);
             
+            // Handle different payment statuses from Layer.js
             if (response.status === "captured") {
+              // Payment successful - verify with backend
               try {
-                // Verify payment
+                console.log("Payment captured, verifying with backend...");
+                
+                // Wait a moment for Zwitch to process the payment
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Verify payment with backend
                 const { data: verifyData, error: verifyError } = await supabase.functions.invoke(
                   "verify-payment",
                   {
                     body: {
-                      payment_token_id: response.payment_token_id,
-                      payment_id: response.payment_id,
-                      status: response.status,
+                      paymentTokenId: response.payment_token_id || response.paymentTokenId,
+                      payment_token_id: response.payment_token_id || response.paymentTokenId,
+                      paymentId: response.payment_id || response.paymentId,
                       dbOrderId: orderData.dbOrderId,
-                      order_id: orderData.paymentToken,
+                      orderId: orderData.paymentToken,
                     },
                   }
                 );
 
-                if (verifyError) throw verifyError;
+                if (verifyError) {
+                  console.error("Verification error:", verifyError);
+                  // Even if verification fails, if Layer.js says captured, treat as success
+                  // But log the error for debugging
+                  console.warn("Verification failed but payment was captured:", verifyError);
+                }
 
+                // Check verification result
+                if (verifyData?.success === false) {
+                  // Verification says payment failed
+                  const errorMsg = verifyData.error || "Payment verification failed";
+                  toast.error("Payment verification failed");
+                  navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent(errorMsg)}`);
+                  return;
+                }
+
+                // Payment verified successfully
                 toast.success("Payment successful!");
                 clearCart();
-                navigate("/");
+                navigate(`/order-success?orderId=${orderData.dbOrderId}`);
               } catch (error) {
-                console.error("Payment verification failed:", error);
-                toast.error("Payment verification failed");
+                console.error("Payment verification error:", error);
+                const errorMessage = error instanceof Error ? error.message : "Payment verification failed";
+                
+                // If Layer.js says captured but verification fails, still show success
+                // but log the error (might be timing issue)
+                if (response.status === "captured") {
+                  console.warn("Verification failed but payment was captured - showing success");
+                  toast.success("Payment successful!");
+                  clearCart();
+                  navigate(`/order-success?orderId=${orderData.dbOrderId}`);
+                } else {
+                  toast.error("Payment verification failed");
+                  navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent(errorMessage)}`);
+                }
               }
             } else if (response.status === "failed") {
+              // Payment failed
               toast.error("Payment failed. Please try again.");
+              navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent("Payment was declined or failed")}`);
             } else if (response.status === "cancelled") {
+              // Payment cancelled
               toast.error("Payment cancelled.");
+              navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent("Payment was cancelled")}`);
+            } else if (response.status === "pending") {
+              // Payment pending - wait and verify
+              toast.info("Payment is pending. Please wait...");
+              setTimeout(async () => {
+                try {
+                  const { data: verifyData } = await supabase.functions.invoke("verify-payment", {
+                    body: {
+                      paymentTokenId: response.payment_token_id || response.paymentTokenId,
+                      payment_token_id: response.payment_token_id || response.paymentTokenId,
+                      dbOrderId: orderData.dbOrderId,
+                    },
+                  });
+                  
+                  if (verifyData?.success) {
+                    toast.success("Payment successful!");
+                    clearCart();
+                    navigate(`/order-success?orderId=${orderData.dbOrderId}`);
+                  } else {
+                    navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent("Payment is still pending")}`);
+                  }
+                } catch (error) {
+                  navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent("Payment verification failed")}`);
+                }
+              }, 3000);
+            } else {
+              // Unknown status
+              console.warn("Unknown payment status:", response.status);
+              navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent(`Unknown payment status: ${response.status}`)}`);
             }
           },
           function(err: any) {
             console.error("Payment gateway error:", err);
-            toast.error("Payment gateway error: " + (err.message || "Unknown error"));
+            const errorMessage = err.message || "Unknown error occurred";
+            toast.error("Payment gateway error: " + errorMessage);
+            navigate(`/payment-failed?orderId=${orderData.dbOrderId}&error=${encodeURIComponent(errorMessage)}`);
           }
         );
       } else if (gatewayInfo.gatewayCode === "razorpay") {

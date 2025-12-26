@@ -24,6 +24,8 @@ import RefundPolicy from "./pages/RefundPolicy";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
 import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 import AuthCallback from "./pages/AuthCallback";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminReturns from "./pages/admin/Returns";
@@ -100,6 +102,8 @@ const AppContent = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/payment-failed" element={<PaymentFailed />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />

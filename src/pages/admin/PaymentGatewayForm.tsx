@@ -16,7 +16,7 @@ import {
 } from "@/lib/admin-payment-gateways";
 import { toast } from "sonner";
 
-const gatewayCredentialFields: Record<string, { label: string; key: string; placeholder: string }[]> = {
+const gatewayCredentialFields: Record<string, { label: string; key: string; placeholder: string; optional?: boolean }[]> = {
   razorpay: [
     { label: "Key ID", key: "key_id", placeholder: "rzp_test_..." },
     { label: "Key Secret", key: "key_secret", placeholder: "Enter your Razorpay key secret" },
@@ -31,8 +31,9 @@ const gatewayCredentialFields: Record<string, { label: string; key: string; plac
     { label: "Secret Key", key: "secret_key", placeholder: "Enter Cashfree secret key" },
   ],
   zwitch: [
-    { label: "Access Key", key: "access_key", placeholder: "ak_live_..." },
-    { label: "Secret Key", key: "secret_key", placeholder: "Enter your Zwitch secret key" },
+    // Zwitch credentials are stored in Supabase Vault, not database
+    // Only show config fields that can be managed
+    { label: "Sub Accounts ID (Optional)", key: "sub_accounts_id", placeholder: "sa_da4f9f84ac6d", optional: true },
   ],
 };
 
@@ -58,7 +59,14 @@ export default function PaymentGatewayForm() {
       const data = await getPaymentGatewayById(id!);
       if (data) {
         setGateway(data);
-        setCredentials(data.credentials || {});
+        // For Zwitch, load config fields (like sub_accounts_id) from config, not credentials
+        if (data.code === "zwitch") {
+          setCredentials({
+            sub_accounts_id: data.config?.sub_accounts_id || "",
+          });
+        } else {
+          setCredentials(data.credentials || {});
+        }
         setIsTestMode(data.is_test_mode);
       } else {
         toast.error("Gateway not found");
@@ -106,25 +114,43 @@ export default function PaymentGatewayForm() {
   const handleSave = async () => {
     if (!gateway) return;
 
-    // Validate required fields
-    const requiredFields = gatewayCredentialFields[gateway.code] || [];
-    const missingFields = requiredFields.filter(
-      (field) => !credentials[field.key] || credentials[field.key].trim() === ""
-    );
-
-    if (missingFields.length > 0) {
-      toast.error(
-        `Please fill in all required fields: ${missingFields.map((f) => f.label).join(", ")}`
+    // For Zwitch, credentials come from Vault, so skip credential validation
+    if (gateway.code !== "zwitch") {
+      // Validate required fields (exclude optional fields)
+      const allFields = gatewayCredentialFields[gateway.code] || [];
+      const requiredFields = allFields.filter((field) => !field.optional);
+      const missingFields = requiredFields.filter(
+        (field) => !credentials[field.key] || credentials[field.key].trim() === ""
       );
-      return;
+
+      if (missingFields.length > 0) {
+        toast.error(
+          `Please fill in all required fields: ${missingFields.map((f) => f.label).join(", ")}`
+        );
+        return;
+      }
     }
 
     setSaving(true);
     try {
-      const { data, error } = await updatePaymentGateway(gateway.id, {
-        credentials,
+      // For Zwitch, save config (sub_accounts_id) but not credentials
+      // Credentials are in Vault
+      const updateData: any = {
         is_test_mode: isTestMode,
-      });
+      };
+
+      if (gateway.code === "zwitch") {
+        // For Zwitch, save config fields (like sub_accounts_id) in config, not credentials
+        updateData.config = {
+          ...gateway.config,
+          sub_accounts_id: credentials.sub_accounts_id || null,
+        };
+      } else {
+        // For other gateways, save credentials normally
+        updateData.credentials = credentials;
+      }
+
+      const { data, error } = await updatePaymentGateway(gateway.id, updateData);
 
       if (error) {
         toast.error(error.message || "Failed to save gateway configuration");
@@ -174,7 +200,9 @@ export default function PaymentGatewayForm() {
             <div>
               <h1 className="text-3xl font-bold">Configure {gateway.name}</h1>
               <p className="text-muted-foreground">
-                Enter your {gateway.name} API credentials
+                {gateway.code === "zwitch" 
+                  ? "Zwitch credentials are configured in Supabase Vault"
+                  : `Enter your ${gateway.name} API credentials`}
               </p>
             </div>
           </div>
@@ -182,15 +210,41 @@ export default function PaymentGatewayForm() {
           {/* Configuration Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Gateway Credentials</CardTitle>
+              <CardTitle>Gateway Configuration</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Zwitch Vault Message */}
+              {gateway.code === "zwitch" && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-blue-900">Credentials Stored in Supabase Vault</h3>
+                      <p className="mt-1 text-sm text-blue-800">
+                        Zwitch credentials (Access Key and Secret Key) are securely stored in Supabase Vault and cannot be managed here.
+                      </p>
+                      <p className="mt-2 text-sm text-blue-800">
+                        <strong>To update credentials:</strong> Go to Supabase Dashboard → Project Settings → Edge Functions → Secrets
+                      </p>
+                      <p className="mt-1 text-sm text-blue-800">
+                        Required secrets: <code className="bg-blue-100 px-1 rounded">ZWITCH_ACCESS_KEY</code> and <code className="bg-blue-100 px-1 rounded">ZWITCH_SECRET_KEY</code>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Test/Live Mode Toggle */}
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="test-mode">Test Mode</Label>
                   <p className="text-sm text-muted-foreground">
                     Use test credentials for testing. Disable for live/production.
+                    {gateway.code === "zwitch" && " (Note: Zwitch credentials are managed in Vault)"}
                   </p>
                 </div>
                 <Switch
@@ -201,20 +255,23 @@ export default function PaymentGatewayForm() {
               </div>
 
               {/* Credential Fields */}
-              <div className="space-y-4">
-                {credentialFields.map((field) => (
-                  <div key={field.key} className="space-y-2">
-                    <Label htmlFor={field.key}>{field.label}</Label>
-                    <Input
-                      id={field.key}
-                      type={field.key.includes("secret") || field.key.includes("salt") ? "password" : "text"}
-                      placeholder={field.placeholder}
-                      value={credentials[field.key] || ""}
-                      onChange={(e) => handleCredentialChange(field.key, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
+              {credentialFields.length > 0 && (
+                <div className="space-y-4">
+                  <Label>Configuration</Label>
+                  {credentialFields.map((field) => (
+                    <div key={field.key} className="space-y-2">
+                      <Label htmlFor={field.key}>{field.label}</Label>
+                      <Input
+                        id={field.key}
+                        type="text"
+                        placeholder={field.placeholder}
+                        value={credentials[field.key] || ""}
+                        onChange={(e) => handleCredentialChange(field.key, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex items-center gap-4 pt-4 border-t">

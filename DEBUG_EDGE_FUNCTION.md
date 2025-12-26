@@ -1,85 +1,79 @@
-# Debug Edge Function 500 Error
+# Debugging Edge Function Errors
 
-Since the gateway is configured and migration is applied, the issue is likely in the Edge Function execution itself.
+## Common Issues & Solutions
 
-## Step 1: Check Edge Function Logs (CRITICAL!)
+### 1. Amount Conversion Issue ✅ FIXED
+**Problem:** Edge Function was dividing amount by 100, but frontend sends rupees directly.
+**Fix:** Removed `/100` conversion - now uses amount directly.
 
-1. Go to **Supabase Dashboard** → **Edge Functions**
-2. Click on **`create-payment-order`**
-3. Click **"Logs"** tab
-4. Try to pay again
-5. **Look for the red error message** - this is the exact error
+### 2. JSON Parsing Errors
+**Problem:** Request body might not be valid JSON.
+**Fix:** Added try-catch around JSON parsing with detailed error messages.
 
-**The logs will show:**
-- Which line failed
-- What the error message is
-- Stack trace
+### 3. Missing Environment Variables
+**Problem:** Supabase URL or Service Key not configured.
+**Fix:** Added validation checks before using environment variables.
 
-## Step 2: Verify Credentials Format
+### 4. Validation Errors
+**Problem:** Generic error messages don't help debug.
+**Fix:** Added detailed validation with specific error messages.
 
-Run this SQL to check the exact credentials structure:
+## How to Debug
 
-```sql
-SELECT 
-  id, 
-  name, 
-  code, 
-  is_active,
-  credentials,
-  jsonb_object_keys(credentials) as credential_keys
-FROM public.payment_gateways 
-WHERE is_active = true;
+### Step 1: Check Edge Function Logs
+1. Go to Supabase Dashboard
+2. Edge Functions → `create-payment-order`
+3. Click "Logs" tab
+4. Look for error messages
+
+### Step 2: Check Browser Console
+1. Open browser DevTools (F12)
+2. Go to Console tab
+3. Look for error messages
+4. Check Network tab for failed requests
+
+### Step 3: Verify Credentials
+1. Supabase Dashboard → Project Settings → Edge Functions → Secrets
+2. Verify `ZWITCH_ACCESS_KEY` exists
+3. Verify `ZWITCH_SECRET_KEY` exists
+4. Check if they start with `ak_test_` and `sk_test_` (for sandbox)
+
+### Step 4: Test with Curl
+```bash
+curl -X POST https://YOUR_PROJECT.supabase.co/functions/v1/create-payment-order \
+  -H "Authorization: Bearer YOUR_ANON_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 10,
+    "currency": "INR",
+    "customerInfo": {
+      "name": "Test User",
+      "email": "test@example.com",
+      "phone": "1234567890",
+      "address": "123 Test St",
+      "city": "Test City",
+      "state": "Test State",
+      "pincode": "123456"
+    },
+    "items": [{
+      "id": "test-id",
+      "title": "Test Product",
+      "price": 10,
+      "quantity": 1
+    }]
+  }'
 ```
 
-**Expected for Zwitch:**
-- `credential_keys` should show: `access_key`, `secret_key`
-- `credentials` should be: `{"access_key": "...", "secret_key": "..."}`
+## What to Look For in Logs
 
-## Step 3: Test Gateway API Directly
-
-The Edge Function might be failing when calling the Zwitch API. Check:
-
-1. **API URL**: Is `https://api.zwitch.io/v1/` accessible?
-2. **Credentials**: Are they valid?
-3. **Amount**: Is it in the correct format?
-
-## Step 4: Common Issues
-
-### Issue: "Failed to create Zwitch payment token"
-**Possible causes:**
-- Invalid credentials
-- Wrong API endpoint
-- Network issue
-- Invalid request format
-
-**Fix:** Check Zwitch API documentation and verify credentials
-
-### Issue: "Failed to create order in database"
-**Possible causes:**
-- Missing required fields
-- RLS policy blocking
-- Invalid data format
-
-**Fix:** Check order creation logs
-
-### Issue: "No active payment gateway configured"
-**Fix:** Even though SQL shows configured, Edge Function might not see it
-- Check RLS policies on `payment_gateways` table
-- Verify Edge Function has service role key
-
-## What I've Added
-
-I've improved error handling to:
-1. Catch gateway errors separately
-2. Clean up failed orders
-3. Provide more detailed error messages
+1. **"Reading Zwitch credentials from Vault"** - Should show credentials found
+2. **"Zwitch API Configuration"** - Should show correct endpoint (sandbox/live)
+3. **"Zwitch API Error"** - If this appears, check the error message
+4. **"Order created in database"** - Should appear before calling Zwitch API
 
 ## Next Steps
 
-1. **Check Edge Function logs** (Step 1) - This is the most important!
-2. **Share the exact error message** from logs
-3. **Verify credentials format** (Step 2)
-4. **Check if it's a gateway API issue** (Step 3)
-
-Once you share the logs, I can provide a specific fix!
-
+1. Redeploy the Edge Function with fixes
+2. Test payment flow
+3. Check logs for any remaining errors
+4. Share error logs if issue persists

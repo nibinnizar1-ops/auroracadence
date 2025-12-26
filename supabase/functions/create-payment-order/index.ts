@@ -6,19 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ============================================
-// Gateway Adapters (Inlined for standalone deployment)
-// ============================================
-
-interface PaymentGatewayConfig {
-  credentials: Record<string, string>;
-  isTestMode: boolean;
-  webhookSecret?: string;
-  config?: Record<string, any>;
-}
-
 interface CreatePaymentOrderRequest {
-  amount: number;
+  amount: number; // Amount in rupees (not paise)
   currency: string;
   customerInfo: {
     name: string;
@@ -29,8 +18,7 @@ interface CreatePaymentOrderRequest {
     state: string;
     pincode: string;
   };
-  orderId: string;
-  orderNumber: string;
+  userId?: string | null;
   items: Array<{
     id: string;
     title: string;
@@ -38,289 +26,165 @@ interface CreatePaymentOrderRequest {
     price: number;
     quantity: number;
   }>;
+  couponCode?: string | null;
 }
 
-interface CreatePaymentOrderResponse {
-  paymentToken?: string;
-  orderId?: string;
-  paymentId?: string;
-  redirectUrl?: string;
-  accessKey?: string;
-  [key: string]: any;
-}
+// ============================================
+// Zwitch Payment Token Creation
+// ============================================
 
-// Zwitch Adapter
-async function createZwitchPaymentOrder(
-  request: CreatePaymentOrderRequest,
-  config: PaymentGatewayConfig
-): Promise<CreatePaymentOrderResponse> {
-  const accessKey = config.credentials.access_key;
-  const secretKey = config.credentials.secret_key;
+async function createZwitchPaymentToken(
+  amount: number,
+  currency: string,
+  customerInfo: CreatePaymentOrderRequest["customerInfo"],
+  mtx: string
+): Promise<{ paymentToken: string; accessKey: string }> {
+  // Step 1: Read credentials from Supabase Vault
+  const accessKeyRaw = Deno.env.get("ZWITCH_ACCESS_KEY");
+  const secretKeyRaw = Deno.env.get("ZWITCH_SECRET_KEY");
+
+  // Trim whitespace and validate
+  const accessKey = accessKeyRaw?.trim();
+  const secretKey = secretKeyRaw?.trim();
+
+  // Debug: List all environment variables (for troubleshooting)
+  const allEnvKeys = Object.keys(Deno.env.toObject());
+  const zwitchKeys = allEnvKeys.filter(k => k.includes("ZWITCH") || k.includes("zwitch"));
+  
+  console.log("Reading Zwitch credentials from Vault:", {
+    hasAccessKey: !!accessKey,
+    accessKeyPrefix: accessKey?.substring(0, 20) || "NOT FOUND",
+    accessKeyLength: accessKey?.length || 0,
+    accessKeyStartsWith: accessKey?.substring(0, 7) || "NONE",
+    hasSecretKey: !!secretKey,
+    secretKeyLength: secretKey?.length || 0,
+    secretKeyStartsWith: secretKey?.substring(0, 7) || "NONE",
+    allEnvKeysCount: allEnvKeys.length,
+    zwitchRelatedKeys: zwitchKeys,
+  });
 
   if (!accessKey || !secretKey) {
-    throw new Error("Zwitch credentials not configured");
-  }
-
-  const apiBaseUrl = config.config?.api_base_url || "https://api.zwitch.io/v1/";
-  const mtx = `MTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-  const tokenResponse = await fetch(`${apiBaseUrl}payment_token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${secretKey}`,
-    },
-    body: JSON.stringify({
-      amount: request.amount, // Zwitch expects amount in rupees (not paise)
-      currency: request.currency || "INR",
-      contact_number: request.customerInfo.phone,
-      email_id: request.customerInfo.email,
-      mtx: mtx,
-      udf: {
-        customer_name: request.customerInfo.name,
-        address: request.customerInfo.address,
-        city: request.customerInfo.city,
-        state: request.customerInfo.state,
-        pincode: request.customerInfo.pincode,
-        order_id: request.orderId,
-        order_number: request.orderNumber,
-      },
-    }),
-  });
-
-  if (!tokenResponse.ok) {
-    const errorText = await tokenResponse.text();
-    console.error("Zwitch payment token creation failed:", {
-      status: tokenResponse.status,
-      statusText: tokenResponse.statusText,
-      error: errorText,
-      requestUrl: `${apiBaseUrl}payment_token`,
-      requestBody: {
-        amount: request.amount, // Amount in rupees (Zwitch expects rupees, not paise)
-        currency: request.currency,
-        contact_number: request.customerInfo.phone,
-        email_id: request.customerInfo.email,
-      }
+    const missing = [];
+    if (!accessKey) missing.push("ZWITCH_ACCESS_KEY");
+    if (!secretKey) missing.push("ZWITCH_SECRET_KEY");
+    
+    // Provide helpful debugging info
+    console.error("Missing Zwitch credentials. Available environment keys:", {
+      totalKeys: allEnvKeys.length,
+      zwitchKeys: zwitchKeys,
+      sampleKeys: allEnvKeys.slice(0, 20),
     });
-    throw new Error(`Failed to create Zwitch payment token: ${errorText}`);
+    
+    throw new Error(
+      `Zwitch credentials not configured in Supabase Vault. Missing: ${missing.join(", ")}. ` +
+      `Please set them in Project Settings → Edge Functions → Secrets, then REDEPLOY the Edge Function. ` +
+      `Available env keys: ${allEnvKeys.length} total.`
+    );
   }
 
-  const zwitchPayment = await tokenResponse.json();
+  // Step 2: Always use sandbox environment
+  // User confirmed they are using sandbox credentials
+  const isSandbox = true;
+  const environment = "sandbox";
 
-  return {
-    paymentToken: zwitchPayment.id,
-    orderId: zwitchPayment.id,
-    accessKey: accessKey,
-  };
-}
+  // Step 3: Always use sandbox endpoint
+  const endpointUrl = "https://api.zwitch.io/v1/pg/sandbox/payment_token";
 
-// Razorpay Adapter
-async function createRazorpayPaymentOrder(
-  request: CreatePaymentOrderRequest,
-  config: PaymentGatewayConfig
-): Promise<CreatePaymentOrderResponse> {
-  const keyId = config.credentials.key_id;
-  const keySecret = config.credentials.key_secret;
-
-  if (!keyId || !keySecret) {
-    throw new Error("Razorpay credentials not configured");
-  }
-
-  const apiBaseUrl = "https://api.razorpay.com/v1/";
-
-  const orderResponse = await fetch(`${apiBaseUrl}orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Basic ${btoa(`${keyId}:${keySecret}`)}`,
-    },
-    body: JSON.stringify({
-      amount: Math.round(request.amount * 100),
-      currency: request.currency || "INR",
-      receipt: request.orderNumber,
-      notes: {
-        order_id: request.orderId,
-        customer_name: request.customerInfo.name,
-        customer_email: request.customerInfo.email,
-        customer_phone: request.customerInfo.phone,
-      },
-    }),
-  });
-
-  if (!orderResponse.ok) {
-    const error = await orderResponse.text();
-    console.error("Razorpay order creation failed:", error);
-    throw new Error("Failed to create Razorpay order");
-  }
-
-  const razorpayOrder = await orderResponse.json();
-
-  return {
-    orderId: razorpayOrder.id,
-    paymentToken: razorpayOrder.id,
-    accessKey: keyId,
-  };
-}
-
-// PayU Adapter
-async function createPayUPaymentOrder(
-  request: CreatePaymentOrderRequest,
-  config: PaymentGatewayConfig
-): Promise<CreatePaymentOrderResponse> {
-  const merchantKey = config.credentials.merchant_key;
-  const merchantSalt = config.credentials.merchant_salt;
-  const merchantId = config.credentials.merchant_id;
-
-  if (!merchantKey || !merchantSalt || !merchantId) {
-    throw new Error("PayU credentials not configured");
-  }
-
-  const txnId = `TXN${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const amount = request.amount.toString();
-  const productInfo = request.items.map((i) => i.title).join(", ");
-  const firstName = request.customerInfo.name.split(" ")[0];
-  const email = request.customerInfo.email;
-  const phone = request.customerInfo.phone;
-
-  // Generate hash for PayU
-  const hashString = `${merchantKey}|${txnId}|${amount}|${productInfo}|${firstName}|${email}|||||||||||${merchantSalt}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(hashString);
-  const hashBuffer = await crypto.subtle.digest("SHA-512", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-  const apiBaseUrl = config.isTestMode
-    ? "https://test.payu.in/_payment"
-    : "https://secure.payu.in/_payment";
-
-  return {
-    orderId: txnId,
-    redirectUrl: apiBaseUrl,
-    hash: hash,
-    merchantKey: merchantKey,
-    merchantId: merchantId,
-    txnId: txnId,
+  console.log("Zwitch API Configuration:", {
+    endpoint: endpointUrl,
+    environment: environment,
+    isSandbox: isSandbox,
     amount: amount,
-    productInfo: productInfo,
-    firstName: firstName,
-    email: email,
-    phone: phone,
-    customerInfo: request.customerInfo,
+    currency: currency,
+    accessKeyPrefix: accessKey.substring(0, 20) + "...",
+    accessKeyFull: accessKey, // Full key to verify
+  });
+
+  // Step 4: Build request body
+  const requestBody: any = {
+    amount: amount, // Zwitch expects amount in rupees
+    currency: currency || "INR",
+    contact_number: customerInfo.phone,
+    email_id: customerInfo.email,
+    mtx: mtx,
   };
-}
 
-// Cashfree Adapter
-async function createCashfreePaymentOrder(
-  request: CreatePaymentOrderRequest,
-  config: PaymentGatewayConfig
-): Promise<CreatePaymentOrderResponse> {
-  const appId = config.credentials.app_id;
-  const secretKey = config.credentials.secret_key;
+  // Step 5: Call Zwitch API
+  // Zwitch expects: Authorization: Bearer <access_key>:<secret_key>
+  // Make sure there are no extra spaces or encoding issues
+  const authHeader = `Bearer ${accessKey}:${secretKey}`;
+  
+  // Detailed logging for debugging
+  console.log("=== Zwitch API Request Details ===", {
+    endpoint: endpointUrl,
+    method: "POST",
+    authorizationHeaderFormat: `Bearer ${accessKey.substring(0, 20)}...:${secretKey.substring(0, 10)}...`,
+    authorizationHeaderLength: authHeader.length,
+    accessKeyFull: accessKey, // Log full key for debugging (remove in production)
+    secretKeyLength: secretKey.length,
+    accessKeyLength: accessKey.length,
+    accessKeyStartsWith: accessKey.substring(0, 7),
+    secretKeyStartsWith: secretKey.substring(0, 7),
+    accessKeyEndsWith: accessKey.substring(accessKey.length - 5),
+    hasSpaces: accessKey.includes(" ") || secretKey.includes(" "),
+    hasNewlines: accessKey.includes("\n") || secretKey.includes("\n"),
+    requestBody: requestBody,
+  });
 
-  if (!appId || !secretKey) {
-    throw new Error("Cashfree credentials not configured");
-  }
-
-  const apiBaseUrl = config.isTestMode
-    ? "https://sandbox.cashfree.com/pg"
-    : "https://api.cashfree.com/pg";
-
-  const orderResponse = await fetch(`${apiBaseUrl}/orders`, {
+  const response = await fetch(endpointUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-client-id": appId,
-      "x-client-secret": secretKey,
-      "x-api-version": "2023-08-01",
+      "Accept": "application/json",
+      "Authorization": authHeader,
     },
-    body: JSON.stringify({
-      order_id: request.orderNumber,
-      order_amount: request.amount,
-      order_currency: request.currency || "INR",
-      customer_details: {
-        customer_id: request.customerInfo.email,
-        customer_name: request.customerInfo.name,
-        customer_email: request.customerInfo.email,
-        customer_phone: request.customerInfo.phone,
-      },
-      order_meta: {
-        return_url: `${config.config?.return_url || ""}?order_id={order_id}`,
-        notify_url: config.config?.webhook_url || "",
-      },
-    }),
+    body: JSON.stringify(requestBody),
   });
 
-  if (!orderResponse.ok) {
-    const error = await orderResponse.text();
-    console.error("Cashfree order creation failed:", error);
-    throw new Error("Failed to create Cashfree order");
+  // Step 6: Handle response
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("=== Zwitch API Error Response ===", {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+      endpoint: endpointUrl,
+      environment: environment,
+      accessKeyUsed: accessKey, // Full key for debugging - verify it matches Zwitch dashboard
+      accessKeyLength: accessKey.length,
+      secretKeyLength: secretKey.length,
+      accessKeyStartsWith: accessKey.substring(0, 10),
+      secretKeyStartsWith: secretKey.substring(0, 10),
+      requestBody: requestBody,
+    });
+    
+    // Try to parse error for better message
+    let errorMessage = errorText;
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (errorJson.error) {
+        errorMessage = errorJson.error;
+      }
+      if (errorJson.request_id) {
+        console.error("Zwitch Request ID:", errorJson.request_id);
+      }
+    } catch (e) {
+      // Not JSON, use as-is
+    }
+    
+    throw new Error(`Failed to create Zwitch payment token: ${errorMessage}`);
   }
 
-  const cashfreeOrder = await orderResponse.json();
+  const zwitchResponse = await response.json();
+  console.log("Zwitch API Success:", {
+    paymentTokenId: zwitchResponse.id,
+    response: zwitchResponse,
+  });
 
+  // Step 7: Return payment token and access key
   return {
-    orderId: cashfreeOrder.order_id,
-    paymentToken: cashfreeOrder.payment_session_id,
-    accessKey: appId,
-  };
-}
-
-// Get active gateway and create payment order
-async function getActiveGatewayAndCreateOrder(
-  supabaseUrl: string,
-  supabaseServiceKey: string,
-  request: CreatePaymentOrderRequest
-): Promise<CreatePaymentOrderResponse & { gatewayCode: string; gatewayName: string }> {
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-  const { data: gateway, error } = await supabase
-    .from("payment_gateways")
-    .select("*")
-    .eq("is_active", true)
-    .single();
-
-  if (error || !gateway) {
-    console.error("Error fetching active gateway:", error);
-    throw new Error(`No active payment gateway configured. Error: ${error?.message || "Unknown error"}`);
-  }
-
-  console.log("Active gateway found:", { code: gateway.code, name: gateway.name, hasCredentials: !!gateway.credentials });
-
-  // Check if credentials exist
-  if (!gateway.credentials || Object.keys(gateway.credentials).length === 0) {
-    throw new Error(`Payment gateway "${gateway.name}" is not configured. Please add credentials in admin panel.`);
-  }
-
-  const config: PaymentGatewayConfig = {
-    credentials: gateway.credentials as Record<string, string>,
-    isTestMode: gateway.is_test_mode,
-    webhookSecret: gateway.webhook_secret || undefined,
-    config: gateway.config as Record<string, any> || {},
-  };
-
-  let paymentResponse: CreatePaymentOrderResponse;
-  switch (gateway.code) {
-    case "zwitch":
-      paymentResponse = await createZwitchPaymentOrder(request, config);
-      break;
-    case "razorpay":
-      paymentResponse = await createRazorpayPaymentOrder(request, config);
-      break;
-    case "payu":
-      paymentResponse = await createPayUPaymentOrder(request, config);
-      break;
-    case "cashfree":
-      paymentResponse = await createCashfreePaymentOrder(request, config);
-      break;
-    default:
-      throw new Error(`Unsupported payment gateway: ${gateway.code}`);
-  }
-
-  return {
-    ...paymentResponse,
-    gatewayCode: gateway.code,
-    gatewayName: gateway.name,
+    paymentToken: zwitchResponse.id, // This is the payment_token
+    accessKey: accessKey, // Return access key for frontend Layer.js
   };
 }
 
@@ -329,21 +193,114 @@ async function getActiveGatewayAndCreateOrder(
 // ============================================
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { amount, currency, customerInfo, items, userId, couponCode } = await req.json();
+    // Step 1: Parse request
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      console.error("Failed to parse request JSON:", parseError);
+      return new Response(
+        JSON.stringify({
+          error: "Invalid request format",
+          details: parseError instanceof Error ? parseError.message : String(parseError),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const {
+      amount,
+      currency,
+      customerInfo,
+      items,
+      userId,
+      couponCode,
+    }: CreatePaymentOrderRequest = requestBody;
+
+    console.log("Received payment request:", {
+      amount: amount,
+      currency: currency,
+      customerEmail: customerInfo?.email,
+      itemCount: items?.length || 0,
+      hasCustomerInfo: !!customerInfo,
+      hasItems: !!items,
+    });
+
+    // Step 2: Validate request
+    if (!amount || amount <= 0) {
+      console.error("Validation error: Invalid amount", { amount });
+      return new Response(
+        JSON.stringify({
+          error: "Invalid amount",
+          details: `Amount must be greater than 0. Received: ${amount}`,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    if (!customerInfo || !customerInfo.email || !customerInfo.phone) {
+      console.error("Validation error: Missing customer info", { customerInfo });
+      return new Response(
+        JSON.stringify({
+          error: "Customer information is required",
+          details: "Email and phone number are required",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    if (!items || items.length === 0) {
+      console.error("Validation error: No items", { items });
+      return new Response(
+        JSON.stringify({
+          error: "At least one item is required",
+          details: "Cart cannot be empty",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Step 3: Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("Missing Supabase environment variables");
+      return new Response(
+        JSON.stringify({
+          error: "Server configuration error",
+          details: "Supabase credentials not configured",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Validate coupon if provided
+    // Step 4: Handle coupon validation (if provided)
     let couponId: string | null = null;
     let discountAmount = 0;
-    let orderSubtotal = amount / 100;
+    // Frontend sends amount in rupees, so use it directly
+    let orderSubtotal = amount;
     let orderTotal = orderSubtotal;
 
     if (couponCode) {
@@ -358,9 +315,7 @@ serve(async (req) => {
             code: couponCode,
             cartTotal: orderSubtotal,
             userId: userId || null,
-            cartItems: items.map((item: any) => ({
-              product_id: item.id,
-            })),
+            cartItems: items.map((item) => ({ product_id: item.id })),
           }),
         });
 
@@ -377,9 +332,10 @@ serve(async (req) => {
       }
     }
 
+    // Step 5: Generate unique transaction ID
     const mtx = `MTX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Validate inventory
+    // Step 6: Validate inventory (if variantId exists)
     const inventoryErrors: string[] = [];
     for (const item of items) {
       if (item.variantId) {
@@ -412,7 +368,7 @@ serve(async (req) => {
       );
     }
 
-    // Create order in database
+    // Step 7: Create order in database
     const { data: dbOrder, error: dbError } = await supabase
       .from("orders")
       .insert({
@@ -450,114 +406,48 @@ serve(async (req) => {
       throw new Error("Failed to create order in database");
     }
 
-    // Get gateway and update order with gateway_id (if column exists)
-    try {
-      const { data: activeGateway } = await supabase
-        .from("payment_gateways")
-        .select("id")
-        .eq("is_active", true)
-        .single();
+    console.log("Order created in database:", {
+      orderId: dbOrder.id,
+      orderNumber: mtx,
+    });
 
-      if (activeGateway) {
-        // Try to update, but don't fail if column doesn't exist
-        await supabase
-          .from("orders")
-          .update({ payment_gateway_id: activeGateway.id })
-          .eq("id", dbOrder.id);
-      }
-    } catch (gatewayUpdateError) {
-      // Ignore if column doesn't exist (migration not applied yet)
-      console.warn("Could not update payment_gateway_id (column may not exist):", gatewayUpdateError);
-    }
+    // Step 8: Create Zwitch payment token
+    const { paymentToken, accessKey } = await createZwitchPaymentToken(
+      orderTotal, // Amount in rupees
+      currency || "INR",
+      customerInfo,
+      mtx
+    );
 
-    // Create order line items
-    const orderLineItems = items.map((item: any) => ({
-      order_id: dbOrder.id,
-      product_id: item.id || null,
-      variant_id: item.variantId || null,
-      quantity: item.quantity,
-      price: parseFloat(item.price) || 0,
-      title: item.title || "Product",
-      variant_title: item.variantTitle || null,
-    }));
-
-    await supabase.from("order_line_items").insert(orderLineItems);
-
-    // Record coupon usage
-    if (couponId && discountAmount > 0) {
-      await supabase.from("coupon_usage").insert({
-        coupon_id: couponId,
-        order_id: dbOrder.id,
-        user_id: userId || null,
-        discount_amount: discountAmount,
-        order_total_before_discount: orderSubtotal,
-        order_total_after_discount: orderTotal,
-      });
-    }
-
-    // Create payment order using gateway
-    let paymentResponse;
-    try {
-      paymentResponse = await getActiveGatewayAndCreateOrder(
-        supabaseUrl,
-        supabaseServiceKey,
-        {
-          amount: orderTotal,
-          currency: currency || "INR",
-          customerInfo,
-          orderId: dbOrder.id,
-          orderNumber: mtx,
-          items: items.map((item: any) => ({
-            id: item.id,
-            title: item.title,
-            variantId: item.variantId,
-            price: parseFloat(item.price) || 0,
-            quantity: item.quantity,
-          })),
-        }
-      );
-    } catch (gatewayError) {
-      console.error("Error creating payment order with gateway:", gatewayError);
-      // Delete the order if payment gateway fails
-      await supabase.from("orders").delete().eq("id", dbOrder.id);
-      throw new Error(`Failed to create payment order: ${gatewayError instanceof Error ? gatewayError.message : "Unknown error"}`);
-    }
-
-    // Update order with gateway order ID
-    await supabase
-      .from("orders")
-      .update({
-        gateway_order_id: paymentResponse.orderId,
-        razorpay_order_id: paymentResponse.orderId,
-        payment_method: paymentResponse.gatewayCode,
-      })
-      .eq("id", dbOrder.id);
-
-    console.log(`${paymentResponse.gatewayName} payment order created:`, paymentResponse.orderId);
-
+    // Step 9: Return response to frontend
     return new Response(
       JSON.stringify({
-        paymentToken: paymentResponse.paymentToken || paymentResponse.orderId,
-        accessKey: paymentResponse.accessKey,
+        paymentToken: paymentToken,
+        accessKey: accessKey,
+        dbOrderId: dbOrder.id,
+        orderNumber: mtx,
         amount: orderTotal,
         currency: currency || "INR",
-        mtx: mtx,
-        dbOrderId: dbOrder.id,
-        gatewayCode: paymentResponse.gatewayCode,
-        redirectUrl: paymentResponse.redirectUrl,
-        ...paymentResponse,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   } catch (error) {
     console.error("Error in create-payment-order:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    console.error("Error stack:", errorStack);
+    const errorMessage = error instanceof Error ? error.message : "Failed to create payment order";
+    const errorStack = error instanceof Error ? error.stack : String(error);
+    
+    console.error("Error details:", {
+      message: errorMessage,
+      stack: errorStack,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+    });
+    
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: errorMessage,
-        details: errorStack ? errorStack.split('\n').slice(0, 5).join('\n') : undefined
+        details: errorStack,
       }),
       {
         status: 500,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getActiveCategoryShowcaseItems } from "@/lib/category-showcase";
+import { ProductGrid } from "./ProductGrid";
 
 const defaultCategories = [
   { 
@@ -62,7 +63,8 @@ export const CategoryShowcase = () => {
           EVERYDAY LUXURY JEWELLERY
         </h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-0">
+        {/* Category Links */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-0 mb-16">
           {categories.map((category, index) => (
             <Link
               key={category.name || index}
@@ -84,6 +86,11 @@ export const CategoryShowcase = () => {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Product Grid */}
+        <div className="mt-8">
+          <ProductGrid limit={12} />
         </div>
       </div>
     </section>

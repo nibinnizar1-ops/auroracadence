@@ -1,55 +1,89 @@
-# Multi-Gateway Payment System - Deployment Instructions
+# Edge Function Deployment Instructions
 
-## Quick Start
+## Prerequisites
+- Access to Supabase Dashboard
+- Edge Functions already created (or create them if they don't exist)
 
-After all code is implemented, follow these steps to deploy:
+## Deploy create-payment-order Edge Function
 
-### Step 1: Apply Database Migrations
+### Step 1: Access Edge Function
+1. Go to **Supabase Dashboard**
+2. Click **"Edge Functions"** in the left sidebar
+3. Find **`create-payment-order`** in the list
+4. Click on it to open
 
-1. Go to **Supabase Dashboard** → **SQL Editor**
-2. Run migrations in this order:
-   - `20250114000003_create_payment_gateways_table.sql`
-   - `20250114000004_migrate_existing_gateway_config.sql` (⚠️ Replace credentials first!)
-   - `20250114000005_update_orders_for_gateways.sql`
+### Step 2: Edit Code
+1. Click **"Code"** tab (or "Edit" button)
+2. **Select all existing code** (Ctrl+A or Cmd+A)
+3. **Delete it** (Backspace or Delete)
 
-### Step 2: Deploy Edge Functions
+### Step 3: Copy New Code
+1. Open `supabase/functions/create-payment-order/index.ts` in your code editor
+2. **Select all** (Ctrl+A or Cmd+A)
+3. **Copy** (Ctrl+C or Cmd+C)
 
-1. **Deploy `create-payment-order`:**
-   - Supabase Dashboard → Edge Functions → Create Function
-   - Name: `create-payment-order`
-   - Copy contents from `supabase/functions/create-payment-order/index.ts`
-   - Deploy
+### Step 4: Paste and Deploy
+1. **Paste** the code into the Supabase editor (Ctrl+V or Cmd+V)
+2. Click **"Deploy"** button (usually at top right)
+3. Wait for deployment to complete
+4. You should see "Deployed successfully" or similar message
 
-2. **Deploy `verify-payment`:**
-   - Supabase Dashboard → Edge Functions → Create Function
-   - Name: `verify-payment`
-   - Copy contents from `supabase/functions/verify-payment/index.ts`
-   - Deploy
+### Step 5: Verify Deployment
+1. Check the **"Logs"** tab
+2. Look for any deployment errors
+3. If successful, you're done!
 
-3. **Upload Gateway Adapters:**
-   - The gateway adapter files need to be accessible to Edge Functions
-   - They should be in `supabase/functions/payment-gateways/` directory
-   - Supabase CLI: `supabase functions deploy create-payment-order --no-verify-jwt`
-   - Or upload via Supabase Dashboard (if supported)
+## Deploy verify-payment Edge Function
 
-### Step 3: Update Frontend
+### Step 1: Access Edge Function
+1. Go to **Supabase Dashboard** → **Edge Functions**
+2. Find **`verify-payment`** in the list
+   - If it doesn't exist, click **"Create Function"** and name it `verify-payment`
+3. Click on it to open
 
-- Code changes are automatic
-- Just refresh your admin panel
-- New "Payment Gateways" link will appear in sidebar
+### Step 2-5: Same as above
+Follow the same steps as `create-payment-order`:
+1. Click **"Code"** tab
+2. Delete all existing code
+3. Copy from `supabase/functions/verify-payment/index.ts`
+4. Paste and click **"Deploy"**
+5. Verify deployment
 
-### Step 4: Test
+## Verification
 
-1. Go to Admin → Payments → Gateways
-2. Verify Zwitch gateway is configured (from migration)
-3. Test adding a new gateway
-4. Test payment flow
+After deploying both functions:
 
----
+1. Go to **Edge Functions** list
+2. Both should show:
+   - ✅ `create-payment-order`
+   - ✅ `verify-payment`
+3. Check **"Last Updated"** timestamp is recent
 
-## Important Notes
+## Troubleshooting
 
-- Old Edge Functions (`create-razorpay-order`, `verify-razorpay-payment`) can be kept for backward compatibility or removed
-- Gateway credentials are stored in database (encrypted in production)
-- Only one gateway can be active at a time
+### Issue: "Function not found"
+**Solution:** Create the function first:
+1. Click **"Create Function"**
+2. Name it exactly: `create-payment-order` or `verify-payment`
+3. Then follow deployment steps
 
+### Issue: "Deployment failed"
+**Solution:**
+1. Check for syntax errors in the code
+2. Make sure you copied the entire file
+3. Check Supabase logs for specific error
+
+### Issue: "Function exists but old code"
+**Solution:**
+1. Make sure you replaced ALL code
+2. Check "Last Updated" timestamp
+3. Redeploy if timestamp is old
+
+## Quick Checklist
+
+- [ ] `create-payment-order` function exists
+- [ ] `verify-payment` function exists
+- [ ] Both functions have latest code
+- [ ] Both functions deployed successfully
+- [ ] "Last Updated" timestamp is recent
+- [ ] No errors in deployment logs

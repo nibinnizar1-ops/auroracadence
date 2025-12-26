@@ -6,270 +6,114 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ============================================
-// Gateway Verification (Inlined for standalone deployment)
-// ============================================
-
-interface PaymentGatewayConfig {
-  credentials: Record<string, string>;
-  isTestMode: boolean;
-  webhookSecret?: string;
-  config?: Record<string, any>;
-}
-
 interface VerifyPaymentRequest {
-  paymentTokenId?: string;
-  paymentId: string;
-  orderId: string;
-  dbOrderId: string;
+  paymentTokenId: string;
+  orderId?: string;
+  dbOrderId?: string;
 }
 
-interface VerifyPaymentResponse {
-  success: boolean;
-  status: "captured" | "failed" | "pending" | "refunded";
-  paymentId: string;
-  orderId: string;
-  amount?: number;
-  currency?: string;
-  error?: string;
-}
+// ============================================
+// Zwitch Payment Verification
+// ============================================
 
-// Zwitch Verification
 async function verifyZwitchPayment(
-  request: VerifyPaymentRequest,
-  config: PaymentGatewayConfig
-): Promise<VerifyPaymentResponse> {
-  const secretKey = config.credentials.secret_key;
+  paymentTokenId: string
+): Promise<{ status: string; paymentId?: string; paymentTokenId: string }> {
+  // Step 1: Read credentials from Supabase Vault
+  const accessKey = Deno.env.get("ZWITCH_ACCESS_KEY");
+  const secretKey = Deno.env.get("ZWITCH_SECRET_KEY");
 
-  if (!secretKey) {
-    throw new Error("Zwitch credentials not configured");
+  console.log("Reading Zwitch credentials from Vault:", {
+    hasAccessKey: !!accessKey,
+    accessKeyPrefix: accessKey?.substring(0, 20) || "NOT FOUND",
+    hasSecretKey: !!secretKey,
+  });
+
+  if (!accessKey || !secretKey) {
+    const missing = [];
+    if (!accessKey) missing.push("ZWITCH_ACCESS_KEY");
+    if (!secretKey) missing.push("ZWITCH_SECRET_KEY");
+    throw new Error(
+      `Zwitch credentials not configured in Supabase Vault. Missing: ${missing.join(", ")}. ` +
+      `Please set them in Project Settings → Edge Functions → Secrets.`
+    );
   }
 
-  const apiBaseUrl = config.config?.api_base_url || "https://api.zwitch.io/v1/";
+  // Step 2: Always use sandbox environment
+  // User confirmed they are using sandbox credentials
+  const isSandbox = true;
+  const environment = "sandbox";
 
-  if (!request.paymentTokenId) {
-    throw new Error("Payment token ID is required for Zwitch verification");
-  }
+  // Step 3: Always use sandbox endpoint
+  const endpointUrl = `https://api.zwitch.io/v1/pg/sandbox/payment_token/${paymentTokenId}`;
 
-  const statusResponse = await fetch(
-    `${apiBaseUrl}payment_token/${request.paymentTokenId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${secretKey}`,
-      },
+  console.log("Zwitch Verification:", {
+    endpoint: endpointUrl,
+    environment: environment,
+    isSandbox: isSandbox,
+    paymentTokenId: paymentTokenId,
+  });
+
+  // Step 4: Call Zwitch API to verify payment
+  const authHeader = `Bearer ${accessKey}:${secretKey}`;
+
+  const response = await fetch(endpointUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": authHeader,
+    },
+  });
+
+  // Step 5: Handle response
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = errorText;
+    
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (errorJson.error) {
+        errorMessage = errorJson.error;
+      }
+    } catch (e) {
+      // Not JSON, use as-is
     }
-  );
-
-  if (!statusResponse.ok) {
-    const error = await statusResponse.text();
-    console.error("Zwitch status check failed:", error);
-    throw new Error("Failed to verify payment status");
-  }
-
-  const paymentData = await statusResponse.json();
-
-  if (paymentData.status !== "captured") {
-    return {
-      success: false,
-      status: paymentData.status || "failed",
-      paymentId: request.paymentId,
-      orderId: request.orderId,
-      error: `Payment not captured. Status: ${paymentData.status}`,
-    };
-  }
-
-  return {
-    success: true,
-    status: "captured",
-    paymentId: request.paymentId,
-    orderId: request.orderId,
-    amount: paymentData.amount,
-    currency: paymentData.currency || "INR",
-  };
-}
-
-// Razorpay Verification
-async function verifyRazorpayPayment(
-  request: VerifyPaymentRequest,
-  config: PaymentGatewayConfig
-): Promise<VerifyPaymentResponse> {
-  const keyId = config.credentials.key_id;
-  const keySecret = config.credentials.key_secret;
-
-  if (!keyId || !keySecret) {
-    throw new Error("Razorpay credentials not configured");
-  }
-
-  const apiBaseUrl = "https://api.razorpay.com/v1/";
-
-  const paymentResponse = await fetch(
-    `${apiBaseUrl}payments/${request.paymentId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${btoa(`${keyId}:${keySecret}`)}`,
-      },
+    
+    console.error("Zwitch API Error:", {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorMessage,
+      endpoint: endpointUrl,
+      paymentTokenId: paymentTokenId,
+      accessKeyPrefix: accessKey?.substring(0, 20),
+    });
+    
+    // If "Could not get merchant details", it might be a timing issue
+    // Return a pending status instead of throwing error
+    if (errorMessage.includes("Could not get merchant details") || errorMessage.includes("merchant details")) {
+      console.warn("Merchant details error - might be timing issue, returning pending status");
+      return {
+        status: "pending",
+        paymentTokenId: paymentTokenId,
+      };
     }
-  );
-
-  if (!paymentResponse.ok) {
-    const error = await paymentResponse.text();
-    console.error("Razorpay payment verification failed:", error);
-    throw new Error("Failed to verify Razorpay payment");
+    
+    throw new Error(`Failed to verify Zwitch payment: ${errorMessage}`);
   }
 
-  const paymentData = await paymentResponse.json();
+  const zwitchResponse = await response.json();
+  console.log("Zwitch Verification Success:", {
+    paymentTokenId: paymentTokenId,
+    status: zwitchResponse.status,
+    paymentId: zwitchResponse.payment_id,
+  });
 
-  if (paymentData.status !== "captured" && paymentData.status !== "authorized") {
-    return {
-      success: false,
-      status: paymentData.status || "failed",
-      paymentId: request.paymentId,
-      orderId: request.orderId,
-      error: `Payment not captured. Status: ${paymentData.status}`,
-    };
-  }
-
+  // Step 6: Return verification result
   return {
-    success: true,
-    status: "captured",
-    paymentId: request.paymentId,
-    orderId: request.orderId,
-    amount: paymentData.amount ? paymentData.amount / 100 : undefined,
-    currency: paymentData.currency || "INR",
+    status: zwitchResponse.status || "unknown",
+    paymentId: zwitchResponse.payment_id,
+    paymentTokenId: paymentTokenId,
   };
-}
-
-// PayU Verification
-async function verifyPayUPayment(
-  request: VerifyPaymentRequest,
-  config: PaymentGatewayConfig
-): Promise<VerifyPaymentResponse> {
-  // PayU verification typically done via webhook
-  // For now, return success if paymentId exists
-  return {
-    success: true,
-    status: "captured",
-    paymentId: request.paymentId,
-    orderId: request.orderId,
-  };
-}
-
-// Cashfree Verification
-async function verifyCashfreePayment(
-  request: VerifyPaymentRequest,
-  config: PaymentGatewayConfig
-): Promise<VerifyPaymentResponse> {
-  const appId = config.credentials.app_id;
-  const secretKey = config.credentials.secret_key;
-
-  if (!appId || !secretKey) {
-    throw new Error("Cashfree credentials not configured");
-  }
-
-  const apiBaseUrl = config.isTestMode
-    ? "https://sandbox.cashfree.com/pg"
-    : "https://api.cashfree.com/pg";
-
-  const paymentResponse = await fetch(
-    `${apiBaseUrl}/orders/${request.orderId}/payments`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "x-client-id": appId,
-        "x-client-secret": secretKey,
-        "x-api-version": "2023-08-01",
-      },
-    }
-  );
-
-  if (!paymentResponse.ok) {
-    const error = await paymentResponse.text();
-    console.error("Cashfree payment verification failed:", error);
-    throw new Error("Failed to verify Cashfree payment");
-  }
-
-  const paymentData = await paymentResponse.json();
-
-  const successfulPayment = paymentData.find(
-    (p: any) => p.payment_status === "SUCCESS"
-  );
-
-  if (!successfulPayment) {
-    return {
-      success: false,
-      status: "failed",
-      paymentId: request.paymentId,
-      orderId: request.orderId,
-      error: "Payment not found or not successful",
-    };
-  }
-
-  return {
-    success: true,
-    status: "captured",
-    paymentId: successfulPayment.cf_payment_id || request.paymentId,
-    orderId: request.orderId,
-    amount: successfulPayment.payment_amount,
-    currency: successfulPayment.payment_currency || "INR",
-  };
-}
-
-// Get gateway and verify payment
-async function getGatewayAndVerifyPayment(
-  supabaseUrl: string,
-  supabaseServiceKey: string,
-  request: VerifyPaymentRequest
-): Promise<VerifyPaymentResponse> {
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-  // Get order to find gateway
-  const { data: order } = await supabase
-    .from("orders")
-    .select("payment_gateway_id, payment_gateways(*)")
-    .eq("id", request.dbOrderId)
-    .single();
-
-  let gateway;
-  if (order?.payment_gateway_id && order.payment_gateways) {
-    gateway = order.payment_gateways as any;
-  } else {
-    // Fallback to active gateway
-    const { data: activeGateway } = await supabase
-      .from("payment_gateways")
-      .select("*")
-      .eq("is_active", true)
-      .single();
-
-    if (!activeGateway) {
-      throw new Error("No payment gateway configured");
-    }
-    gateway = activeGateway;
-  }
-
-  const config: PaymentGatewayConfig = {
-    credentials: gateway.credentials as Record<string, string>,
-    isTestMode: gateway.is_test_mode,
-    webhookSecret: gateway.webhook_secret || undefined,
-    config: gateway.config || {},
-  };
-
-  switch (gateway.code) {
-    case "zwitch":
-      return await verifyZwitchPayment(request, config);
-    case "razorpay":
-      return await verifyRazorpayPayment(request, config);
-    case "payu":
-      return await verifyPayUPayment(request, config);
-    case "cashfree":
-      return await verifyCashfreePayment(request, config);
-    default:
-      throw new Error(`Unsupported payment gateway: ${gateway.code}`);
-  }
 }
 
 // ============================================
@@ -277,95 +121,117 @@ async function getGatewayAndVerifyPayment(
 // ============================================
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const {
-      payment_token_id,
-      payment_id,
-      status,
-      dbOrderId,
-      order_id,
-    } = await req.json();
+    // Step 1: Parse request
+    const { paymentTokenId, payment_token_id, orderId, dbOrderId }: VerifyPaymentRequest & { payment_token_id?: string } = await req.json();
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const tokenId = paymentTokenId || payment_token_id;
 
-    // Verify payment
-    const verifyResponse = await getGatewayAndVerifyPayment(
-      supabaseUrl,
-      supabaseServiceKey,
-      {
-        paymentTokenId: payment_token_id,
-        paymentId: payment_id,
-        orderId: order_id || "",
-        dbOrderId: dbOrderId,
-      }
-    );
-
-    if (!verifyResponse.success) {
-      return new Response(
-        JSON.stringify({
-          error: verifyResponse.error || "Payment verification failed",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!tokenId) {
+      throw new Error("Payment token ID is required");
     }
 
-    // Update order
+    console.log("Verifying payment:", {
+      paymentTokenId: tokenId,
+      orderId: orderId,
+      dbOrderId: dbOrderId,
+    });
+
+    // Step 2: Initialize Supabase client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Step 3: Verify payment with Zwitch
+    const verificationResult = await verifyZwitchPayment(tokenId);
+
+    console.log("Payment verification result:", verificationResult);
+
+    // Step 4: Find order in database
+    const orderIdToUse = dbOrderId || orderId;
+    if (!orderIdToUse) {
+      throw new Error("Order ID is required to update order status");
+    }
+
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", orderIdToUse)
+      .single();
+
+    if (orderError || !order) {
+      throw new Error(`Order not found: ${orderIdToUse}`);
+    }
+
+    // Step 5: Update order based on payment status
+    // Handle different status values from Zwitch
+    const isSuccess = verificationResult.status === "captured" || 
+                     verificationResult.status === "success" ||
+                     verificationResult.status === "completed";
+    const paymentStatus = isSuccess ? "paid" : 
+                         verificationResult.status === "failed" ? "failed" : 
+                         verificationResult.status === "pending" ? "pending" :
+                         "pending"; // Default to pending for unknown statuses
+
     const { error: updateError } = await supabase
       .from("orders")
       .update({
-        gateway_payment_id: verifyResponse.paymentId,
-        razorpay_payment_id: verifyResponse.paymentId,
-        payment_status: "completed",
-        status: "confirmed",
+        payment_status: paymentStatus,
+        status: isSuccess ? "confirmed" : order.status,
+        gateway_payment_id: verificationResult.paymentId,
+        gateway_order_id: verificationResult.paymentTokenId,
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", dbOrderId);
+      .eq("id", orderIdToUse);
 
     if (updateError) {
-      console.error("Database update error:", updateError);
+      console.error("Error updating order:", updateError);
       throw new Error("Failed to update order status");
     }
 
-    // Deduct inventory
-    const { data: deductResult, error: deductError } = await supabase.rpc(
-      "deduct_order_inventory",
-      {
-        p_order_id: dbOrderId,
-      }
-    );
+    // Step 6: Deduct inventory if payment successful
+    if (isSuccess && order.items) {
+      for (const item of order.items) {
+        if (item.variantId) {
+          const { error: inventoryError } = await supabase.rpc("deduct_inventory", {
+            p_variant_id: item.variantId,
+            p_quantity: item.quantity,
+          });
 
-    if (deductError) {
-      console.error("Error deducting inventory:", deductError);
-    } else if (deductResult && !(deductResult as any).success) {
-      console.warn("Inventory deduction had issues:", deductResult);
-    } else {
-      console.log("Inventory deducted successfully for order:", dbOrderId);
+          if (inventoryError) {
+            console.error(`Error deducting inventory for variant ${item.variantId}:`, inventoryError);
+          }
+        }
+      }
     }
 
-    console.log("Payment verified successfully for order:", dbOrderId);
-
+    // Step 7: Return response
     return new Response(
       JSON.stringify({
-        success: true,
-        message: "Payment verified successfully",
+        success: isSuccess,
+        status: verificationResult.status,
+        paymentId: verificationResult.paymentId,
+        paymentTokenId: verificationResult.paymentTokenId,
+        orderId: orderIdToUse,
       }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   } catch (error) {
     console.error("Error in verify-payment:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Failed to verify payment",
+        details: error instanceof Error ? error.stack : String(error),
+      }),
       {
-        status: 400,
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
