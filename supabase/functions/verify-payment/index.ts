@@ -172,7 +172,8 @@ serve(async (req) => {
     // Handle different status values from Zwitch
     const isSuccess = verificationResult.status === "captured" || 
                      verificationResult.status === "success" ||
-                     verificationResult.status === "completed";
+                     verificationResult.status === "completed" ||
+                     verificationResult.status === "paid";
     const paymentStatus = isSuccess ? "paid" : 
                          verificationResult.status === "failed" ? "failed" : 
                          verificationResult.status === "pending" ? "pending" :
